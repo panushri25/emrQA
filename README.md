@@ -20,3 +20,9 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
 [anusri-home]: https://www.linkedin.com/in/anusri-pampari-594bb5126/
+
+## Generation
+
+## Data Analysis
+
+## Baselines
