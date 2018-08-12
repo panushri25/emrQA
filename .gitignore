@@ -1,0 +1,13 @@
+# Compiler outputs #
+*.a
+*.bat
+*.exe
+*.json
+
+# Directories #
+output
+
+# Packages #
+*.gz
+*.iso
+*.jar
