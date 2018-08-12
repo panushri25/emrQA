@@ -10,8 +10,13 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 
 (under construction)
 
-## Installation Instructions
+## Requirements
+#### General
+- Python 2
+- NLP Datasets from [i2b2][i2b2-datasets]
 
+#### Python Packages
+- json
 
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
 [anusri-home]: https://www.linkedin.com/in/anusri-pampari-594bb5126/
