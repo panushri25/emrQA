@@ -16,6 +16,7 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 - NLP Datasets from [i2b2][i2b2-datasets]
 
 #### Python Packages
+- nltk
 - json
 
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/

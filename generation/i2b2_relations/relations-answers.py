@@ -10,7 +10,7 @@ from nltk.corpus import wordnet as wn
 import string
 import json
 import sys
-from problem_classfiers import concept_is_CommonNoun, concept_is_PastTense
+
 reload(sys)
 sys.setdefaultencoding("ISO-8859-1")
 import random

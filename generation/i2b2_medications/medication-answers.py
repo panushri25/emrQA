@@ -5,21 +5,26 @@ import itertools
 import json
 import random
 
-class GenerateQA():
-
 ### Fix start_token ##
-    DosageFilePath = [
+## i2b2 file paths ##
+
+DosageFilePath = [
     "/home/anusri/Desktop/IBM/i2b2/medication/annotations_ground_truth/converted.noduplicates.sorted/",
         "/home/anusri/Desktop/IBM/i2b2/medication/training.ground.truth/"]
 
-    MedicationClinicalNotes = ["/home/anusri/Desktop/IBM/i2b2/medication/train.test.released.8.17.09/"]
+MedicationClinicalNotes = ["/home/anusri/Desktop/IBM/i2b2/medication/train.test.released.8.17.09/"]
+
+class GenerateQA():
+
+
+    DosageFilePath = DosageFilePath
+    MedicationClinicalNotes = MedicationClinicalNotes
 
 
     def __init__(self):
 
         self.ReadMedicationData()
         self.ReadTemplates()
-
 
     def ReadTemplates(self):
 
@@ -29,6 +34,7 @@ class GenerateQA():
         self.logical_out = []
 
         ########################################## Read unique ids ##############################################
+
         csvreader = list(csv.reader(open("/home/anusri/Desktop/codes_submission/dataset_indexing/questions_index.csv")))
         for listi in csvreader[1:]:
             self.question_id[listi[0]] = listi[1]
@@ -39,6 +45,7 @@ class GenerateQA():
 
 
         ### File to write Question-Answers ##
+
         ofile = open("question-answers-final.csv","w")
         self.filewriter = csv.writer(ofile, delimiter="\t")
         self.filewriter.writerow(["Question", "Logical Form" ,"Answer", "Answer line in note",  "Note ID", "Difference in QA lines"])
@@ -101,6 +108,7 @@ class GenerateQA():
 
     def ReadMedicationData(self):
 
+        ## based on format of the i2b2 files. please refer to the i2b2 medications challeneg documentation for details ###
         abbs = {"m": "medication", "do": "dosage", "mo": "mode", "f": "frequency", "du": "duration", "r": "problem",
                 "e": "event", "t": "temporal", "c": "certainty", "ln": "list"}
         exception = ["list", "event", "temporal", "certainty"]
