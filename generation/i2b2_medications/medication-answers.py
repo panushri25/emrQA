@@ -6,6 +6,9 @@ import json
 import random
 
 ### Fix start_token ##
+#check for uniqness of questions
+#check for uniqness of answers
+
 ## i2b2 file paths ##
 
 DosageFilePath = [
@@ -13,6 +16,17 @@ DosageFilePath = [
         "/home/anusri/Desktop/IBM/i2b2/medication/training.ground.truth/"]
 
 MedicationClinicalNotes = ["/home/anusri/Desktop/IBM/i2b2/medication/train.test.released.8.17.09/"]
+
+## template file path ##
+
+template_file_path = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
+
+## output file paths ##
+
+qa_output = "/home/anusri/Desktop/emrQA/output/medication-qa.csv"
+ql_output = "/home/anusri/Desktop/emrQA/output/medication-ql.csv"
+medications_qa_output_json = "/home/anusri/Desktop/emrQA/output/medication-qa.json"
+medications_ql_output_json = "/home/anusri/Desktop/emrQA/output/medication-ql.json"
 
 class GenerateQA():
 
@@ -26,39 +40,130 @@ class GenerateQA():
         self.ReadMedicationData()
         self.ReadTemplates()
 
+    def ReadMedicationData(self):
+
+        ## based on format of the i2b2 files. please refer to the i2b2 medications challenge documentation for details ###
+
+        abbs = {"m": "medication", "do": "dosage", "mo": "mode", "f": "frequency", "du": "duration", "r": "problem",
+                "e": "event", "t": "temporal", "c": "certainty", "ln": "list"}
+        exception = ["list", "event", "temporal",
+                     "certainty"]  ## very few annotations are tagged with these, hence we willl ignore them.
+
+        self.MedicationData = []
+        ClinicalNotes = {}
+
+        ## read the clinical notes ##
+        for paths in self.MedicationClinicalNotes:
+            files = [f for f in listdir(paths) if isfile(join(paths, f))]
+            for file in files:
+                remote_file = open(paths + file)
+                ClinicalNotes[file.strip()] = remote_file.readlines()
+
+        ## read the annotations per clinical note (parse the files) ##
+
+        annotations_span = []
+        for paths in self.DosageFilePath:
+            files = [f for f in listdir(paths) if isfile(join(paths, f))]
+            for file in files:
+                remote_file = open(paths + file)
+
+                note_id = file.split(".")[0]
+                note_id = note_id.split("_")[0]
+                # print(file)
+                dictionary = {note_id: []}
+                PatientNote = ClinicalNotes[note_id]  ## access the corresponding clinical note.
+                flag = 0
+                for line in remote_file:
+                    med_list = {}
+                    line = line.replace("|||", "||")
+                    words = line.split("||")
+
+                    for word in words:
+                        term = word.split("=")
+                        try:
+                            type = abbs[term[0].strip()]  ## check if all of them lie within the given annotation list
+                        except:
+                            print(paths + file)
+                            flag = 1
+                            break
+
+                        full_annotation = "=".join(term[1:])
+                        index = [pos for pos, char in enumerate(full_annotation) if char == "\""]
+                        pos1 = int(index[0])
+                        pos2 = int(index[-1])
+
+                        annotation = full_annotation[pos1 + 1:pos2]
+                        indxs = full_annotation[pos2 + 1:].split(",")
+
+                        line_in_note = ""
+                        start_line = None
+                        if annotation == "nm" or type in exception:
+                            med_list[type] = [annotation, line_in_note, start_line]
+                            continue
+
+                        # print(word,annotation,indxs)
+                        # print(indxs)
+                        for indx in indxs:
+                            indx = indx.strip()
+                            out = indx.split(" ")
+
+                            start_line = out[0].split(":")[0]
+                            start_token = out[0].split(":")[1]
+                            end_line = out[1].split(":")[0]
+                            end_token = out[1].split(":")[1]
+
+                            line_in_note += ",".join(PatientNote[int(start_line) - 1:int(end_line)])
+
+                            # if int(end_line) > int(start_line):
+                            #    print(type)
+                            #    print(line)
+                            #    print(end_line,start_line)
+
+                            ## some end line number are greater than start line numbers. annotation line_in_note can span upto 3 lines
+                            ## annotation  can be discontinous set of tokens
+
+                        med_list[type] = [annotation, line_in_note, start_line, start_token]
+
+                        # if start_line != end_line:
+                        #   print(int(end_line)-int(start_line))
+                        #    print(line_in_note)
+
+                    dictionary[note_id].append(med_list)
+
+                remote_file.close()
+
+                if flag == 0:
+                    self.MedicationData.append((dictionary, PatientNote))
+
+
+                    # print(annotations_span)
+
     def ReadTemplates(self):
 
-        self.question_id = {}
-        self.logicalform_id = {}
         self.medications_out = {"paragraphs": [], "title": "medication"}
         self.logical_out = []
 
-        ########################################## Read unique ids ##############################################
-
-        csvreader = list(csv.reader(open("/home/anusri/Desktop/codes_submission/dataset_indexing/questions_index.csv")))
-        for listi in csvreader[1:]:
-            self.question_id[listi[0]] = listi[1]
-
-        csvreader = list(csv.reader(open("/home/anusri/Desktop/codes_submission/dataset_indexing/logical_forms_index.csv")))
-        for listi in csvreader[1:]:
-            self.logicalform_id[listi[0]] = listi[1]
+        ########################################## Set File Paths ##############################################
 
 
         ### File to write Question-Answers ##
 
-        ofile = open("question-answers-final.csv","w")
+        ofile = open(qa_output,"w")
         self.filewriter = csv.writer(ofile, delimiter="\t")
         self.filewriter.writerow(["Question", "Logical Form" ,"Answer", "Answer line in note",  "Note ID", "Difference in QA lines"])
 
         ### File to write Question-Logical Forms ##
 
-        ofile = open("/home/anusri/Desktop/IBM/Answers-old/combine/ql_dataset/medications.csv", "w")
+        ofile = open(ql_output, "w")
         self.filewriter_forlform = csv.writer(ofile, delimiter="\t")
         self.filewriter_forlform.writerow(["Question", "Logical Form"])
 
         ### File to read templates ###
-        file = open("templates-all.csv")
+
+        file = open(template_file_path)
         filereader = list(csv.reader(file))
+
+        ## read only templates relevant to medications challenge ##
 
         med_lines = []
         for line in filereader[1:]:
@@ -66,11 +171,16 @@ class GenerateQA():
                 continue
             med_lines.append(line)
 
+        ########################################## Main Function Call ##############################################
+
         for (dictionary,PatientNote) in self.MedicationData:
             for note_id in dictionary:
                 out_patient = {"note_id": note_id, "context": PatientNote, "qas": []}
 
-                med_list = dictionary[note_id]
+                med_list = dictionary[note_id] ## extract all the annotations given per note ##
+
+                ## create one to many mappings, to use them for QA. Coreference not resolved ##
+
                 self.MakeMedicationRelationMappings(med_list)
 
                 flag = 0
@@ -83,12 +193,17 @@ class GenerateQA():
                     answertype = [type.strip() for type in answertype]
                     logical_form = line[3].strip()
 
-                    question = question.replace("|problem| or |problem|","|problem|")
+                    #question = question.replace("|problem| or |problem|","|problem|")
+                    question = question.replace("|medication| or |medication|", "|medication|")
+                    question = question.replace("|problem| or |problem|", "|problem|")
+                    question = question.replace("|test| or |test|", "|test|")
+                    question = question.replace("|test| |test| |test|", "|test|")
                     question = question.replace("\t", "")
                     logical_form = logical_form.replace("\t", "")
+
                     if question.strip() == "":
                         continue
-                    #print(line)
+
                     answer_out = self.MakeMedicationQA(question,logical_form,answertype,med_list,flag,note_id,PatientNote,question_id)
 
                     if len(answer_out) != 0:
@@ -98,111 +213,22 @@ class GenerateQA():
             self.medications_out["paragraphs"].append(out_patient)
 
         ################################################################# Dump JSON ###########################################
-        json_out = "medications-QA-updated.json"
+
+        json_out = medications_qa_output_json
         with open(json_out, 'w') as outfile:
             json.dump(self.medications_out, outfile, ensure_ascii=False) ## storage format same as SQUAD
 
-        json_out = "medications-QL.json"
-        with open(json_out, 'w') as outfile:
-            json.dump(self.logical_out, outfile, ensure_ascii=False) ## storage format ## question logical_form question_id logicalfrom_id source
+        #json_out = medications_ql_output_json
+        #with open(json_out, 'w') as outfile:
+        #    json.dump(self.logical_out, outfile, ensure_ascii=False) ## storage format, question logical_form question_id logicalfrom_id source
 
-    def ReadMedicationData(self):
-
-        ## based on format of the i2b2 files. please refer to the i2b2 medications challeneg documentation for details ###
-        abbs = {"m": "medication", "do": "dosage", "mo": "mode", "f": "frequency", "du": "duration", "r": "problem",
-                "e": "event", "t": "temporal", "c": "certainty", "ln": "list"}
-        exception = ["list", "event", "temporal", "certainty"]
-
-        self.MedicationData = []
-        ClinicalNotes = {}
-
-        for paths in self.MedicationClinicalNotes:
-            files = [f for f in listdir(paths) if isfile(join(paths, f))]
-            for file in files:
-                remote_file = open(paths + file)
-                ClinicalNotes[file.strip()] = remote_file.readlines()
-
-
-        annotations_span = []
-        for paths in self.DosageFilePath:
-            files = [f for f in listdir(paths) if isfile(join(paths, f))]
-            for file in files:
-                remote_file = open(paths + file)
-
-                note_id = file.split(".")[0]
-                note_id = note_id.split("_")[0]
-                #print(file)
-                dictionary  = {note_id: []}
-                PatientNote = ClinicalNotes[note_id]
-                flag = 0
-                for line in remote_file:
-                    med_list = {}
-                    line = line.replace("|||", "||")
-                    words = line.split("||")
-                    for word in words:
-                        term = word.split("=")
-                        try:
-                            type = abbs[term[0].strip()] ## check if all of the lie within the giveb annotation lis
-                        except:
-                            print(paths + file)
-                            flag = 1
-                            break
-
-                        full_annotation = "=".join(term[1:])
-                        index = [pos for pos, char in enumerate(full_annotation) if char == "\""]
-                        pos1 = int(index[0])
-                        pos2 = int(index[-1])
-
-
-                        annotation = full_annotation[pos1 + 1:pos2]
-                        indxs = full_annotation[pos2 + 1:].split(",")
-
-                        line_in_note = ""
-                        start_line = None
-                        if annotation == "nm" or type in exception:
-
-                            med_list[type] = [annotation, line_in_note,start_line]
-                            continue
-
-                        # print(word,annotation,indxs)
-                        #print(indxs)
-                        for indx in indxs:
-                            indx = indx.strip()
-                            out = indx.split(" ")
-                            start_line = out[0].split(":")[0]
-                            start_token = out[0].split(":")[1]
-                            end_line = out[1].split(":")[0]
-                            end_token = out[1].split(":")[1]
-
-                            line_in_note += ",".join(PatientNote[int(start_line)-1:int(end_line)])
-                            #if int(end_line) > int(start_line):
-                            #    print(type)
-                            #    print(line)
-                            #    print(end_line,start_line)
-
-                            # some end line number are greater than start line numbers. answer annotatipon spans upto 3 lines
-                            ## answer can be discontinous set of tokens
-
-                        med_list[type] = [annotation,line_in_note,start_line,start_token]
-
-                        #if start_line != end_line:
-                        #   print(int(end_line)-int(start_line))
-                        #    print(line_in_note)
-
-                    dictionary[note_id].append(med_list)
-
-                remote_file.close()
-
-                if flag == 0:
-                    self.MedicationData.append((dictionary,PatientNote))
-                    #print(annotations_span)
     def MakeMedicationRelationMappings(self,med_list):
 
         self.map_meds_to_reasons = {}
         self.map_meds_to_dosages = {}
         self.map_meds_to_frequency = {}
         self.map_reasons_to_meds = {}
-        self.map_durations_to_med = {}
+        self.map_meds_to_durations = {}
         self.medications_all = {}
 
 
@@ -225,8 +251,8 @@ class GenerateQA():
                 if med_annotations["problem"][0] not in self.map_reasons_to_meds:
                     self.map_reasons_to_meds[med_annotations["problem"][0]] = []
 
-            if med_annotations["medication"][0] not in self.map_durations_to_med:
-                self.map_durations_to_med[med_annotations["medication"][0]] = []
+            if med_annotations["medication"][0] not in self.map_meds_to_durations:
+                self.map_meds_to_durations[med_annotations["medication"][0]] = []
 
             if med_annotations["dosage"][0] != "nm":
                 #if med_annotations["event"] == ""
@@ -238,8 +264,10 @@ class GenerateQA():
             if med_annotations["frequency"][0] != "nm":
                 self.map_meds_to_frequency[med_annotations["medication"][0]].append(med_annotations["frequency"]+med_annotations["list"])
             if med_annotations["duration"][0] != "nm":
-                self.map_durations_to_med[med_annotations["medication"][0]].append(med_annotations["duration"]+med_annotations["list"])
+                self.map_meds_to_durations[med_annotations["medication"][0]].append(med_annotations["duration"]+med_annotations["list"])
+
     def MakeAnswer(self, quest_list_nar, answertype, med_annotations, question_list,line_num,line_token):
+
         result_num = []
         result_token = []
         answer_line = []
@@ -247,7 +275,6 @@ class GenerateQA():
         answer = []
 
         idx = 0
-
         if answertype[idx] == "yes":
             answer = ["yes"]*len(question_list)
             answer_line.extend(question_list)
@@ -299,7 +326,7 @@ class GenerateQA():
                 list_nar.extend([x[3] for x in self.map_meds_to_dosages[med[0]]])
                 list_nar.append(med[3])
         elif answertype == ["duration"]:
-            for listr in self.map_durations_to_med[med_annotations["medication"][0]]:
+            for listr in self.map_meds_to_durations[med_annotations["medication"][0]]:
                 answer += [listr[0]]
                 answer_line.append(listr[1])
                 result_num.append(int(listr[2]))
@@ -320,6 +347,7 @@ class GenerateQA():
             answer = []
 
         return [answer,answer_line, result_num, result_token, list_nar]
+
     def CheckForErrors(self, question_list,logical_form_template):
         dup_rwords_list = []
         unique_templates = []
@@ -328,6 +356,9 @@ class GenerateQA():
                 if question.strip() == "":
                     continue
                 question = question.replace("|medication| or |medication|", "|medication|")
+                question = question.replace("|problem| or |problem|", "|problem|")
+                question = question.replace("|test| or |test|", "|test|")
+                question = question.replace("|test| |test| |test|", "|test|")
                 question = question.strip()
 
                 if question not in unique_templates:
@@ -355,13 +386,19 @@ class GenerateQA():
             return None
 
         return dup_rwords_list
+
+    #def MakeMedicationQL(self):
+
     def MakeMedicationQA(self,question_list,logical_form_template, answertype,med_list,flag,note_id,PatientNote,question_id):
+
+        print(question_list)
+        print(logical_form_template)
 
         answer_out = []
         intial_question_list = question_list.split("##")
         intial_template = logical_form_template
 
-        orginal_questions_list = question_list
+        #orginal_questions_list = question_list
         orginal_logical_form_template = logical_form_template.strip()
 
         question_list = question_list.split("##")
@@ -373,6 +410,7 @@ class GenerateQA():
             dup_rwords_list = self.CheckForErrors(question_list,logical_form_template) ## type of words to replace ##
 
         ##### make questions #####
+
         for med_annotations in med_list: ## Medlist is a list of dictionaries (each dict is a medication and its attributes)
 
             logical_form_template = orginal_logical_form_template
@@ -437,6 +475,7 @@ class GenerateQA():
                         tuple_orginal.append((question,orginal))
                         paraphrase_questions.append(question)
                 #print(paraphrase_questions)
+
           ### Make Logical Form ####
 
                 idx = 0
@@ -457,8 +496,8 @@ class GenerateQA():
                 [answer, answer_line, result_num, result_token, list_nar] = self.MakeAnswer( quest_list_nar, answertype, med_annotations, question_line, line_num,line_token)
 
             else:
-
                 return  answer_out
+
             if len(answer) != 0:
                 perms = list(itertools.product(result_num+line_num, result_num+line_num))
                 diffs = [abs(val1 - val2) for (val1, val2) in perms]
@@ -467,8 +506,9 @@ class GenerateQA():
                 Note_val = "#".join(answer_line)
                 list_nar = ",".join(list_nar)
 
-
+                print(len(paraphrase_questions))
                 unique_paras = set(paraphrase_questions)
+                print(len(unique_paras))
                 if unique_paras not in self.unique_questions:
                     #print(unique_paras)
                     tuple_id = []
@@ -511,8 +551,8 @@ class GenerateQA():
 
                             start_line = result_num[idx]  ## only result
                             start_token = result_token[idx]
-                            print(start_line)
-                            print(start_token)
+                            #print(start_line)
+                            #print(start_token)
                             #print(unique_paras)
                             #print(evidence_answer)
                             #print(PatientNote[result_num[idx]-1])
@@ -549,4 +589,6 @@ class GenerateQA():
 
         return answer_out
 
+
+#if __name__=="__main":
 GenerateQA()
