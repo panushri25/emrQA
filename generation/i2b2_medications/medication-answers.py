@@ -5,9 +5,6 @@ import itertools
 import json
 import random
 
-### Fix start_token ##
-#check for uniqness of questions
-#check for uniqness of answers
 
 ## i2b2 file paths ##
 
@@ -27,7 +24,6 @@ qa_output = "/home/anusri/Desktop/emrQA/output/medication-qa.csv"
 ql_output = "/home/anusri/Desktop/emrQA/output/medication-ql.csv"
 medications_qa_output_json = "/home/anusri/Desktop/emrQA/output/medication-qa.json"
 medications_ql_output_json = "/home/anusri/Desktop/emrQA/output/medication-ql.json"
-
 
 ### write to csv file for viz ##
 
