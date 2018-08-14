@@ -208,7 +208,7 @@ class GenerateQA():
                     if question.strip() == "":
                         continue
 
-                    answer_out = self.MakeMedicationQA(question,logical_form,answertype,med_list,flag,note_id,PatientNote,question_id)
+                    answer_out = self.MakeMedicationQLA(question,logical_form,answertype,med_list,flag,note_id,PatientNote,question_id)
 
                     if len(answer_out) != 0:
                         #for answer in answer_out:
@@ -270,199 +270,7 @@ class GenerateQA():
             if med_annotations["duration"][0] != "nm":
                 self.map_meds_to_durations[med_annotations["medication"][0]].append(med_annotations["duration"]+med_annotations["list"])
 
-    def MakeAnswer(self, quest_list_nar, answertype, med_annotations, question_list,line_num,line_token):
-
-        result_num = []
-        result_token = []
-        answer_line = []
-        list_nar = quest_list_nar
-        answer = []
-
-        idx = 0
-        if answertype[idx] == "yes":
-
-            ### the question line is evidence for yes or no questions ##
-            answer = ["yes"]*len(question_list)
-            answer_line.extend(question_list)
-            result_num.extend(line_num)
-            result_token.extend(line_token)
-            list_nar.extend(quest_list_nar)
-        elif answertype == ["problem"]:
-            for listr in self.map_meds_to_reasons[med_annotations["medication"][0]]:
-                answer += [listr[0]]
-                answer_line.append(listr[1])
-                result_num.append(int(listr[2]))
-                result_token.append(int(listr[3]))
-                list_nar.append(listr[3])
-        elif answertype == ["frequency"]:
-            # print("frequency")
-            for listr in self.map_meds_to_frequency[med_annotations["medication"][0]]:
-                answer += [listr[0]]
-                answer_line.append(listr[1])
-                result_num.append(int(listr[2]))
-                result_token.append(int(listr[3]))
-                list_nar.append(listr[3])
-        elif answertype == ["dosage"]:
-            for med in [med_annotations["medication"][0]]:
-                for listr in self.map_meds_to_dosages[med]:
-                    answer += [listr[0]]
-                    answer_line.append(listr[1])
-                    result_num.append(int(listr[2]))
-                    result_token.append(int(listr[3]))
-                    list_nar.append(listr[3])
-        elif answertype == ["medication"]:
-            for listr in self.map_reasons_to_meds[med_annotations["problem"][0]]:
-                answer += [listr[0]]
-                answer_line.append(listr[1])
-                result_num.append(int(listr[2]))
-                result_token.append(int(listr[3]))
-                list_nar.append(listr[3])
-        elif answertype == ["medication", 'dosage']:
-            meds = self.map_reasons_to_meds[med_annotations["problem"][0]]
-            for med in meds:
-                dos = ",".join([x[0] for x in self.map_meds_to_dosages[med[0]]])
-                answer += ["( " + med[0] + ", " + dos + ")"]
-                #answer += [dos]
-                answer_line.append(med[1])
-                answer_line.extend([x[1] for x in self.map_meds_to_dosages[med[0]]])
-                result_num.extend([int(med[2])])
-                result_token.extend([int(med[3])])
-                result_num.extend([int(x[2]) for x in self.map_meds_to_dosages[med[0]]])
-                result_token.extend([int(x[3]) for x in self.map_meds_to_dosages[med[0]]])
-                list_nar.extend([x[3] for x in self.map_meds_to_dosages[med[0]]])
-                list_nar.append(med[3])
-        elif answertype == ["duration"]:
-            for listr in self.map_meds_to_durations[med_annotations["medication"][0]]:
-                answer += [listr[0]]
-                answer_line.append(listr[1])
-                result_num.append(int(listr[2]))
-                result_token.append(int(listr[3]))
-                list_nar.append(listr[3])
-        elif answertype == ["medications_all"]:
-            for medication_name in self.medications_all:
-                listr = self.medications_all[medication_name][0]
-                answer += [listr[0]]
-                answer_line.append(listr[1])
-                result_num.append(int(listr[2]))
-                result_token.append(int(listr[3]))
-                list_nar.append(listr[3])
-        elif answertype == ["none"]:
-            pass
-        else:
-            print(answertype)
-            answer = []
-
-        return [answer,answer_line, result_num, result_token, list_nar]
-
-    def CheckForErrors(self, question_list,logical_form_template):
-
-        ## gather all the placeholders in the templates ##
-
-        dup_rwords_list = []
-        unique_templates = []
-        qwords_list = []
-
-        ## check if all the questions  paraphrases  have the same placeholders ##
-
-        for question in question_list:
-                if question.strip() == "":
-                    continue
-                question = question.replace("|medication| or |medication|", "|medication|")
-                question = question.replace("|problem| or |problem|", "|problem|")
-                question = question.replace("|test| or |test|", "|test|")
-                question = question.replace("|test| |test| |test|", "|test|")
-                question = question.strip()
-
-                if question not in unique_templates:
-                    unique_templates.append(question)
-                else:
-                    continue
-
-                qwords = question.split("|")
-                dup_rwords = qwords[1:len(qwords):2]
-                qwords_list.append(qwords)
-
-                if len(dup_rwords_list) == 0:
-                    dup_rwords_list = [set(dup_rwords)]
-                else:
-                    if set(dup_rwords) not in dup_rwords_list:
-                        print("Error Out Of Context Question:")
-                        print(question, logical_form_template, question_list)
-                        return None
-
-
-        ## Check if the placeholders in logical forms are same as the placeholders in question ##
-
-        lwords = logical_form_template.split("|")
-        dup_lrwords = lwords[1:len(lwords):2]
-        if set(dup_lrwords) not in dup_rwords_list:
-            print("Error Out Of Context Question-Logical Form Pairs:")
-            print(question_list, logical_form_template)
-            return None
-
-        return dup_rwords_list
-
-    def MakeMedicationQL(self, rwords, question_list, logical_form_template, dup_rwords):
-
-        intial_template = logical_form_template
-        paraphrase_questions = []
-        tuple_orginal = []
-
-        if rwords == ["time"]:
-            time = str(random.randint(2, 5)) + random.choice([" years", " weeks"])
-            for question in question_list:
-                original = question
-                question = question.replace("|time|", time)
-            logical_form_template = logical_form_template.replace("|time|", time)
-            rwords = []
-            dup_rwords = []
-            paraphrase_questions.append(question)
-            tuple_orginal.append((question, original))
-        else:
-
-            ############################ make questions ############################################
-
-            for question in question_list:
-                orginal = question
-                idx = 0
-                done = []
-                for types in list(dup_rwords):
-                    # temp = qwords
-                    index = question.find("|" + types + "|")
-                    if index == -1 and types not in done:
-                        print(question, "|" + types + "|", done)
-                    question = question.replace("|" + types + "|", rwords[idx])
-                    done.append(types)
-                    idx += 1
-                tuple_orginal.append((question, orginal))
-                paraphrase_questions.append(question)
-
-                ###################################### Make Logical Form #################################
-
-                ## tab ##
-            idx = 0
-            done = []
-            for types in list(dup_rwords):
-                logical_form_template.replace("|treatment|", "|medication")
-                index = logical_form_template.find("|" + types + "|")
-                if index == -1 and types not in done:
-                    print(logical_form_template, "|" + types + "|", done, types)
-                done.append(types)
-
-                logical_form_template = logical_form_template.replace("|" + types + "|", rwords[idx])
-                idx += 1
-
-        logical_form = logical_form_template
-
-        ### Writing question-logical form ##
-
-        for (question, orginal) in tuple_orginal:
-            self.filewriter_forlform.writerow(
-                [question] + [logical_form.strip()] + [orginal.strip()] + [intial_template])
-
-        return [paraphrase_questions, tuple_orginal, logical_form]
-
-    def MakeMedicationQA(self,question_list,logical_form_template, answertype,med_list,flag,note_id,PatientNote,question_id):
+    def MakeMedicationQLA(self,question_list,logical_form_template, answertype,med_list,flag,note_id,PatientNote,question_id):
 
         answer_out = []
 
@@ -579,6 +387,196 @@ class GenerateQA():
 
         return answer_out
 
+    def MakeMedicationQL(self, rwords, question_list, logical_form_template, dup_rwords):
+
+        intial_template = logical_form_template
+        paraphrase_questions = []
+        tuple_orginal = []
+
+        if rwords == ["time"]:
+            time = str(random.randint(2, 5)) + random.choice([" years", " weeks"])
+            for question in question_list:
+                original = question
+                question = question.replace("|time|", time)
+            logical_form_template = logical_form_template.replace("|time|", time)
+            rwords = []
+            dup_rwords = []
+            paraphrase_questions.append(question)
+            tuple_orginal.append((question, original))
+        else:
+
+            ############################ make questions ############################################
+
+            for question in question_list:
+                orginal = question
+                idx = 0
+                done = []
+                for types in list(dup_rwords):
+                    # temp = qwords
+                    index = question.find("|" + types + "|")
+                    if index == -1 and types not in done:
+                        print(question, "|" + types + "|", done)
+                    question = question.replace("|" + types + "|", rwords[idx])
+                    done.append(types)
+                    idx += 1
+                tuple_orginal.append((question, orginal))
+                paraphrase_questions.append(question)
+
+                ###################################### Make Logical Form #################################
+
+                ## tab ##
+            idx = 0
+            done = []
+            for types in list(dup_rwords):
+                logical_form_template.replace("|treatment|", "|medication")
+                index = logical_form_template.find("|" + types + "|")
+                if index == -1 and types not in done:
+                    print(logical_form_template, "|" + types + "|", done, types)
+                done.append(types)
+
+                logical_form_template = logical_form_template.replace("|" + types + "|", rwords[idx])
+                idx += 1
+
+        logical_form = logical_form_template
+
+        ### Writing question-logical form ##
+
+        for (question, orginal) in tuple_orginal:
+            self.filewriter_forlform.writerow(
+                [question] + [logical_form.strip()] + [orginal.strip()] + [intial_template])
+
+        return [paraphrase_questions, tuple_orginal, logical_form]
+
+    def MakeAnswer(self, quest_list_nar, answertype, med_annotations, question_list,line_num,line_token):
+
+        result_num = []
+        result_token = []
+        answer_line = []
+        list_nar = quest_list_nar
+        answer = []
+
+        idx = 0
+        if answertype[idx] == "yes":
+
+            ### the question line is evidence for yes or no questions ##
+            answer = ["yes"]*len(question_list)
+            answer_line.extend(question_list)
+            result_num.extend(line_num)
+            result_token.extend(line_token)
+            list_nar.extend(quest_list_nar)
+        elif answertype == ["problem"]:
+            for listr in self.map_meds_to_reasons[med_annotations["medication"][0]]:
+                answer += [listr[0]]
+                answer_line.append(listr[1])
+                result_num.append(int(listr[2]))
+                result_token.append(int(listr[3]))
+                list_nar.append(listr[3])
+        elif answertype == ["frequency"]:
+            # print("frequency")
+            for listr in self.map_meds_to_frequency[med_annotations["medication"][0]]:
+                answer += [listr[0]]
+                answer_line.append(listr[1])
+                result_num.append(int(listr[2]))
+                result_token.append(int(listr[3]))
+                list_nar.append(listr[3])
+        elif answertype == ["dosage"]:
+            for med in [med_annotations["medication"][0]]:
+                for listr in self.map_meds_to_dosages[med]:
+                    answer += [listr[0]]
+                    answer_line.append(listr[1])
+                    result_num.append(int(listr[2]))
+                    result_token.append(int(listr[3]))
+                    list_nar.append(listr[3])
+        elif answertype == ["medication"]:
+            for listr in self.map_reasons_to_meds[med_annotations["problem"][0]]:
+                answer += [listr[0]]
+                answer_line.append(listr[1])
+                result_num.append(int(listr[2]))
+                result_token.append(int(listr[3]))
+                list_nar.append(listr[3])
+        elif answertype == ["medication", 'dosage']:
+            meds = self.map_reasons_to_meds[med_annotations["problem"][0]]
+            for med in meds:
+                dos = ",".join([x[0] for x in self.map_meds_to_dosages[med[0]]])
+                answer += ["( " + med[0] + ", " + dos + ")"]
+                #answer += [dos]
+                answer_line.append(med[1])
+                answer_line.extend([x[1] for x in self.map_meds_to_dosages[med[0]]])
+                result_num.extend([int(med[2])])
+                result_token.extend([int(med[3])])
+                result_num.extend([int(x[2]) for x in self.map_meds_to_dosages[med[0]]])
+                result_token.extend([int(x[3]) for x in self.map_meds_to_dosages[med[0]]])
+                list_nar.extend([x[3] for x in self.map_meds_to_dosages[med[0]]])
+                list_nar.append(med[3])
+        elif answertype == ["duration"]:
+            for listr in self.map_meds_to_durations[med_annotations["medication"][0]]:
+                answer += [listr[0]]
+                answer_line.append(listr[1])
+                result_num.append(int(listr[2]))
+                result_token.append(int(listr[3]))
+                list_nar.append(listr[3])
+        elif answertype == ["medications_all"]:
+            for medication_name in self.medications_all:
+                listr = self.medications_all[medication_name][0]
+                answer += [listr[0]]
+                answer_line.append(listr[1])
+                result_num.append(int(listr[2]))
+                result_token.append(int(listr[3]))
+                list_nar.append(listr[3])
+        elif answertype == ["none"]:
+            pass
+        else:
+            print(answertype)
+            answer = []
+
+        return [answer,answer_line, result_num, result_token, list_nar]
+
+    def CheckForErrors(self, question_list, logical_form_template):
+
+        ## gather all the placeholders in the templates ##
+
+        dup_rwords_list = []
+        unique_templates = []
+        qwords_list = []
+
+        ## check if all the questions  paraphrases  have the same placeholders ##
+
+        for question in question_list:
+            if question.strip() == "":
+                continue
+            question = question.replace("|medication| or |medication|", "|medication|")
+            question = question.replace("|problem| or |problem|", "|problem|")
+            question = question.replace("|test| or |test|", "|test|")
+            question = question.replace("|test| |test| |test|", "|test|")
+            question = question.strip()
+
+            if question not in unique_templates:
+                unique_templates.append(question)
+            else:
+                continue
+
+            qwords = question.split("|")
+            dup_rwords = qwords[1:len(qwords):2]
+            qwords_list.append(qwords)
+
+            if len(dup_rwords_list) == 0:
+                dup_rwords_list = [set(dup_rwords)]
+            else:
+                if set(dup_rwords) not in dup_rwords_list:
+                    print("Error Out Of Context Question:")
+                    print(question, logical_form_template, question_list)
+                    return None
+
+        ## Check if the placeholders in logical forms are same as the placeholders in question ##
+
+        lwords = logical_form_template.split("|")
+        dup_lrwords = lwords[1:len(lwords):2]
+        if set(dup_lrwords) not in dup_rwords_list:
+            print("Error Out Of Context Question-Logical Form Pairs:")
+            print(question_list, logical_form_template)
+            return None
+
+        return dup_rwords_list
 
 if __name__=="__main__":
     GenerateQA()
