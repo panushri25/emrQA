@@ -14,6 +14,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding("ISO-8859-1")
 import random
+import argparse
 
 ## Resolve the use of medications and treatments
 ## Resolve id for question-logical forms
@@ -37,7 +38,6 @@ AstFilePath = [ "/home/anusri/Desktop/IBM/i2b2/relations/concept_assertion_relat
 ## template file path ##
 
 template_file_path = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
-
 
 ## matching notes in temporal, coreference and relations dataset ##
 
