@@ -15,14 +15,15 @@ In our work, we have currently made use of all the challenge datasets except the
 
 Some statistics of the generated data:
 
-| Datasets | QA pairs | QL pairs | #Notes | 
+| Datasets | QA pairs | QL pairs | #Clinical Notes | 
 | :------: | :------: | :------: | :----: | 
 | i2b2 relations | 141,783 | 1,061,710 | 426 |
-| i2b2 assertions | 141,783 | 1,061,710 | 426 |
-| i2b2 medications | 141,783 | 1,061,710 | 426 |
-| i2b2 heart disease risk | 141,783 | 1,061,710 | 426 |
-| i2b2 smoking | 141,783 | 1,061,710 | 426 |
-| i2b2 obesity | 141,783 | 1,061,710 | 426 |
+| i2b2 assertions |  |  |  |
+| i2b2 medications | 223,829 | 165,471 | 262 |
+| i2b2 heart disease risk | 53,828 | 39,170 | 119 |
+| i2b2 smoking | 4,518 | 6 | 1,506 |
+| i2b2 obesity | 55,346 | 280 | 1,118 |
+| **emrQA** | **479,304** | **1,265,283** | **3,431** |
 
 
 
