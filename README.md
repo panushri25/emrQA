@@ -17,7 +17,9 @@ In our work, we have currently made use of all the challenge datasets except the
 Some statistics of the generated data:
 
 | Datasets | QA pairs | QL pairs | #Notes | 
+| :------: | :------: | :------: | :----: | 
 | i2b2 relations | 141,783 | 1,061,710 | 426 |
+| :------------: | :-----: | :-------: | :-: | 
 | i2b2 relations | 141,783 | 1,061,710 | 426 |
 
 ## Requirements
