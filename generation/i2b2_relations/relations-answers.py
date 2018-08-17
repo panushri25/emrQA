@@ -17,7 +17,9 @@ import random
 import argparse
 
 ## Resolve the use of medications and treatments
-## Resolve id for question-logical forms
+
+
+###################################################### SET FILE PATHS ##################################################################
 
 ## i2b2 file paths ##
 
@@ -45,21 +47,21 @@ matching_notes = "/home/anusri/Desktop/IBM/Answers-old/temporal/matching_notes.c
 
 ## output file paths ##
 
-qa_output = "/home/anusri/Desktop/emrQA/output/relations-qa.csv"
+#qa_output = "/home/anusri/Desktop/emrQA/output/relations-qa.csv"
 ql_output = "/home/anusri/Desktop/emrQA/output/relations-ql.csv"
 relations_qa_output_json = "/home/anusri/Desktop/emrQA/output/relations-qa.json"
-relations_ql_output_json = "/home/anusri/Desktop/emrQA/output/relations-ql.json"
+#relations_ql_output_json = "/home/anusri/Desktop/emrQA/output/relations-ql.json"
 
 ### write to csv file for viz ##
 
 qa_csv_write  = False
-
+ql_csv_write  = True
 
 class GenerateRelationsQuestions():
 
     def __init__(self):
 
-        ## synsets to identify common nouns, will be used in preprocessing to remove generic concepts ##
+        ## synsets to identify common nouns, will be used in preprocessing to remove generic i2b2 concepts ##
 
         self.similar = []
         val = [wn.synsets('problem'), wn.synsets('test'), wn.synsets('procedure'), wn.synsets('disease'),
@@ -208,7 +210,6 @@ class GenerateRelationsQuestions():
 
                     relate = words[1].split("=")[1].split("\"")[1]
 
-                    ### Common Noun Check Start ###
                     val1 = vals[0]
                     val2 = vals[1]
                     t1 = val1[0]
@@ -321,7 +322,6 @@ class GenerateRelationsQuestions():
                 vals.append((annotation,line_in_note,start_line,start_token))
 
             coref_concepts[type].append(vals)
-
         return coref_concepts
 
     def ReadAssertionsData(self):
@@ -388,16 +388,19 @@ class GenerateRelationsQuestions():
 
         ### File to write Question-Answers ##
 
-        ofile = open(qa_output, "w")
-        self.filewriter = csv.writer(ofile, delimiter="\t")
-        self.filewriter.writerow(
-            ["Question", "Logical Form", "Answer", "Answer line in note", "Note ID", "Difference in QA lines"])
+
+        if qa_csv_write:
+            ofile = open(qa_output, "w")
+            self.filewriter = csv.writer(ofile, delimiter="\t")
+            self.filewriter.writerow(
+                ["Question", "Logical Form", "Answer", "Answer line in note", "Note ID", "Difference in QA lines"])
 
         ### File to write Question-Logical Forms ##
 
-        ofile = open(ql_output, "w")
-        self.filewriter_forlform = csv.writer(ofile, delimiter="\t")
-        self.filewriter_forlform.writerow(["Question", "Logical Form"])
+        if ql_csv_write:
+            ofile = open(ql_output, "w")
+            self.filewriter_forlform = csv.writer(ofile, delimiter="\t")
+            self.filewriter_forlform.writerow(["Question", "Logical Form"])
 
         ### File to read templates ###
 
@@ -450,8 +453,8 @@ class GenerateRelationsQuestions():
                 else:
                     types_to_replace = []
 
-                answer_out = self.MakeLabTestQA(question, logical_form, types_to_replace, answertype, helper, Relations,
-                                                Noteid, Coreferences)
+                answer_out = self.MakeLabTestQA(question, logical_form, types_to_replace, answertype, helper, Relations, Noteid, Coreferences)
+
                 if len(answer_out) != 0:
                     out_patient["qas"].extend(answer_out)
 
@@ -467,136 +470,133 @@ class GenerateRelationsQuestions():
 
     def MakeLabTestQA(self, question, logical_form, types_to_replace, answertype, helper, Relations, Noteid, Coreferences):
 
-        question = question.replace("|problem| or |problem|", "|problem|")
         orginal_question = question
         logical_form_template = logical_form
         answer_out = []
-        # qwords = question.split("|")
-        # dup_rwords = qwords[1:len(qwords):2] ## words in question to replace - create a orginal cop ##
 
         for relate in helper:
+
             if relate == "ast":
+
                 questions_list = question.strip().split("##")
-                self.HandleAssertionQA(Noteid, types_to_replace, questions_list, logical_form_template,
-                                       Coreferences, answertype)
+
+                ## fixed a bug, intially ot included ##
+                answer_out = self.HandleAssertionQA(Noteid, types_to_replace, questions_list, logical_form_template, Coreferences, answertype) ## fixed bug, intially was not including assertations data
+
             else:
+
                 try:
                     relevant_relations = Relations[relate]  ## Get relations which satisy the relate criteria
-                    # print(relate)
                 except:
                     continue
 
-                # print(relate)
                 for val1, val2 in relevant_relations:
 
                     annotations = {val1[1]: (val1[0], val1[2], val1[3], val1[4]),
                                    val2[1]: (val2[0], val2[2], val2[3], val2[4])}
 
-                    # out = self.MakeQuestion(dup_rwords, annotations, qwords, Coreferences)
+                    ## check if there are placeholders in the question, call function to replace the placeholders ##
+
                     if len(types_to_replace) != 0:
                         questions_list = question.strip().split("##")
-                        out = self.MakeQuestion_new(types_to_replace, annotations, questions_list,
-                                                    logical_form_template, Coreferences, Noteid)
-                        # print(out)
+                        out = self.MakeQuestion_new(types_to_replace, annotations, questions_list, logical_form_template, Coreferences, Noteid)
                         if out == None:
                             continue
                         else:
-                            [question_list, logical_form, question_line, question_start_line] = out
+                            [question_list, logical_form, question_lines, question_start_line, question_start_token] = out
                     else:
-                        [question_list, logical_form, question_line, question_start_line] = [question.split("##"),
-                                                                                             logical_form_template,
-                                                                                             "", ""]
+                        ## if no placeholders directly use the question ##
+                        [question_list, logical_form, question_lines, question_start_line, question_start_token]= [question.split("##"), logical_form_template, "", "", ""]
 
-                        # print(question)
+                    ### Writing question - logical form ##
+
+                    paraphrase_questions = set(question_list)
+                    question_templates = orginal_question.split("##")
+
+                    if len(question_list) != len(question_templates):
+                        print(question_list)
+                        print(question_templates)
+
+                    unique_tup = list(set(zip(question_list, question_templates)))
+
+                    if ql_csv_write:
+
+                        for qidx in range(len(unique_tup)):
+                            self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_template])
 
                     ##### Make answers for the succesful questions ####
 
-                    [answer, answer_line, answer_start_line, answer_start_token] = self.AnswerSubFunction(
-                        answertype, val1, val2, Noteid, relate)
-                    # print(answer,answer_line)
-                    # print(answer)
-                    if len(answer) != 0:
-                        result_num = answer_start_line + question_start_line
-                        perms = list(
-                            itertools.product(result_num, result_num))  ## find different pairs of numbers ##
-                        diffs = [abs(val1 - val2) for (val1, val2) in perms]
-                        difference = max(diffs)
+                    [answer, answer_line, answer_start_line, answer_start_token] = self.AnswerSubFunction(answertype, val1, val2, Noteid, relate,  question_lines, question_start_line, question_start_token)
 
-                        paraphrase_questions = set(question_list)
-                        tuple_id = []
-                        question_templates = orginal_question.split("##")
-                        if len(question_list) != len(question_templates):
-                            print(question_list)
-                            print(question_templates)
-                        unique_tup = list(set(zip(question_list, question_templates)))
-                        for qidx in range(len(unique_tup)):
-                            # q_id = self.question_id[unique_tup[qidx][1]]
-                            # l_id = self.logicalform_id[logical_form_template]
-                            self.filewriter_forlform.writerow(
-                                [unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [
-                                    logical_form_template])
-                            # tuple_id.append([q_id,unique_tup[qidx][0]])
+                    if len(answer) != 0:
+
                         if paraphrase_questions not in self.unique_questions:
 
                             self.unique_questions.append(paraphrase_questions)
 
+
                             ans_list = []
                             for idx in range(len(answer)):
-                                ## evidence per answer ##
-                                evidence_answer = []
-                                evidence_start = []
-                                evidence_temp_line = question_line + answer_line
-                                evidence_temp_start = question_start_line + answer_start_line
-                                for pdx in range(len(evidence_temp_line)):
-                                    if evidence_temp_line[pdx] not in evidence_answer:
-                                        evidence_answer.append(evidence_temp_line[pdx])
-                                        evidence_start.append(evidence_temp_start[pdx])
-                                if answer[idx] == "yes" or answer[idx] == "no":
-                                    start_line = ""
-                                    start_token = ""
-                                else:
-                                    start_line = answer_start_line[idx]
-                                    start_token = answer_start_token[idx]
 
-                                val = {"answer_start": [start_line, start_token], "text": answer[idx],
-                                       "evidence": evidence_answer,
-                                       "evidence_start": evidence_start}  # evidence will have q_line_answer_line
+                                start_line = answer_start_line[idx]
+                                start_token = answer_start_token[idx]
+
+                                val = {"answer_start": [start_line, start_token], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": answer_start_token[idx]}
+
                                 if val not in ans_list:
                                     ans_list.append(val)
-                            answer_temp = {"answers": ans_list,
-                                           "id": [zip(question_list, question_templates), logical_form_template],
-                                           "question": list(paraphrase_questions)}
+
+                                ## ""evidence"" in the dictionary above is currently just the answer line in the note. You can also consider question line and answer line from note as evidence in that uncomment below code and use it accordingly ##
+
+                                '''
+                                   ## evidence per answer ##
+                                   evidence_answer = []
+                                   evidence_start = []
+                                   evidence_temp_line = question_line + answer_line
+                                   evidence_temp_start = question_start_line + answer_start_line
+                                   for pdx in range(len(evidence_temp_line)):
+                                       if evidence_temp_line[pdx] not in evidence_answer:
+                                           evidence_answer.append(evidence_temp_line[pdx])
+                                           evidence_start.append(evidence_temp_start[pdx])
+
+                                   if answer[idx] == "yes" or answer[idx] == "no":
+                                       start_line = ""
+                                       start_token = ""
+                                   else:
+                                       start_line = answer_start_line[idx]
+                                       start_token = answer_start_token[idx]
+
+                                   val = {"answer_start": [start_line, start_token], "text": answer[idx],"evidence": evidence_answer,"evidence_start": evidence_start}
+                                   # evidence will have q_line_answer_line
+
+                                    if qa_csv_write:
+
+                                   result_num = answer_start_line + question_start_line
+                                   perms = list(
+                                       itertools.product(result_num, result_num))  ## find different pairs of numbers ##
+                                   diffs = [abs(val1 - val2) for (val1, val2) in perms]
+                                   difference = max(diffs)
+
+                                   Note_val = "#".join(list(set(evidence_temp_line)))
+
+                                   self.filewriter.writerow( ["##".join(paraphrase_questions)] + [logical_form] + [",".join(answer)] + [Note_val] + [Noteid + "_RelationsChallenge"] + [difference])
+                                   '''
+
+                            answer_temp = {"answers": ans_list,"id": [zip(question_list, question_templates), logical_form_template], "question": list(paraphrase_questions)}
                             answer_out.append(answer_temp)
 
-                            Note_val = "#".join(list(set(evidence_temp_line)))
-
-                            self.filewriter.writerow(
-                                ["##".join(paraphrase_questions)] + [logical_form] + [",".join(answer)] + [
-                                    Note_val] + [Noteid + "_RelationsChallenge"] + [difference])
-
-
-                    else:
-                        ### Writing only question - logical form ##
-
-                        question_templates = orginal_question.split("##")
-                        unique_tup = list(set(zip(question_list, question_templates)))
-                        for qidx in range(len(unique_tup)):
-                            # q_id = self.question_id[unique_tup[qidx][1]]
-                            # l_id = self.logicalform_id[logical_form_template]
-                            self.filewriter_forlform.writerow(
-                                [unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [
-                                    logical_form_template])
         return answer_out
 
     def HandleAssertionQA(self,Noteid,dup_rwords, question_list_templates, logical_form_template,Coreferences, answertype):
         types_to_replace = list(dup_rwords)
-        answer = []
-        result_num = []
-        answer_line = []
-        result_token = []
         answer_out = []
         if len(dup_rwords) != 0:
             for problem in self.problem_status[Noteid]:
+                answer = []
+                result_num = []
+                answer_line = []
+                result_token = []
+
                 logical_form = logical_form_template
                 status = self.problem_status[Noteid][problem]
                 rwords = list(dup_rwords)
@@ -605,7 +605,11 @@ class GenerateRelationsQuestions():
                     #print(problem)
                     (t1,valid_list) = self.CheckIfConceptValid((problem,status[0][1],status[0][2],status[0][3]),rwords[idx], Coreferences )
                     if t1 == None:
-                        flag =1
+                        if valid_list != None:
+                            replace_annoation = random.choice(valid_list)
+                            rwords[idx] = replace_annoation
+                        else:
+                            flag = 1
                     else:
                         rwords[idx] = t1
 
@@ -614,6 +618,7 @@ class GenerateRelationsQuestions():
 
                 new_question_list = []
 
+                ### Make Question ###
                 for question in question_list_templates:
                     done = []
                     idx = 0
@@ -627,6 +632,7 @@ class GenerateRelationsQuestions():
                     #if question not in new_question_list:
                     new_question_list.append(question)
 
+                ## ### Make Logical Form ###
                 idx = 0
                 done = []
                 for types in list(types_to_replace):
@@ -645,72 +651,52 @@ class GenerateRelationsQuestions():
                     result_token.append(int(val[3]))
 
                 if answertype == "none":
-
                     question_templates = question_list_templates
                     unique_tup = list(set(zip(new_question_list, question_templates)))
                     for qidx in range(len(unique_tup)):
+                        self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_template])
+                else:
 
-                        #q_id = self.question_id[unique_tup[qidx][1]]
-                        #l_id = self.logicalform_id[logical_form_template]
+                    question_templates = question_list_templates
+                    if len(new_question_list) != len(question_templates):
+                        print(new_question_list)
+                        print(question_templates)
+                    unique_tup = list(set(zip(new_question_list, question_templates)))
+
+                    for qidx in range(len(unique_tup)):
                         self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_template])
 
 
-                else:
                     if len(answer) != 0:
+
+                        '''
                         perms = list(itertools.product(result_num, result_num))
                         diffs = [abs(val1 - val2) for (val1, val2) in perms]
                         difference = max(diffs)
                         question_templates = question_list_templates
-                        if len(new_question_list) != len(question_templates):
-                            print(new_question_list)
-                            print(question_templates)
-
-                        unique_tup = list(set(zip(new_question_list, question_templates)))
-                        tuple_id = []
-                        for qidx in range(len(unique_tup)):
-                            #q_id = self.question_id[unique_tup[qidx][1]]
-                            #l_id = self.logicalform_id[logical_form_template]
-                            self.filewriter_forlform.writerow(
-                                [unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [
-                                    logical_form_template])
-                            #self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [q_id] + [l_id])
-                            #tuple_id.append([q_id,unique_tup[qidx][0]])
-
+                        
                         Note_val = "#".join(answer_line)
+                        '''
                         new_question_list = set(new_question_list)
                         if new_question_list not in self.unique_questions:
-                            self.filewriter.writerow(
-                                ["##".join(new_question_list)] + [logical_form] + [",".join(answer)] + [Note_val] + [
-                                    Noteid + "_RelationsChallenge"] + [
-                                    difference])
+                            '''
+                            if qa_csv_write:
+                                self.filewriter.writerow(["##".join(new_question_list)] + [logical_form] + [",".join(answer)] + [Note_val] + [Noteid + "_RelationsChallenge"] + [ difference])
+                            '''
                             self.unique_questions.append(set(new_question_list))
 
                             ans_list = []
                             for idx in range(len(answer)):
-                                ## evidence per answer ##
-                                print(answer[idx])
-                                val = {"answer_start": [result_num[idx], result_token[idx]], "text": answer[idx],
-                                                 "evidence": "",
-                                                 "evidence_start": ""}
+                                #print(answer[idx], result_num[idx], result_token[idx])
+                                val = {"answer_start": [result_num[idx], result_token[idx]], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": result_num[idx]}
                                 if val not in ans_list:
                                     ans_list.append(val)
 
-                                # evidence will have q_line_answer_line
+                            # evidence will have q_line_answer_line
                             answer_temp = {"answers": ans_list, "id": [zip(question_templates,new_question_list),logical_form_template], "question": list(set(new_question_list))}
                             answer_out.append(answer_temp)
 
 
-                    else:
-
-                        question_templates = question_list_templates
-                        unique_tup = list(set(zip(new_question_list, question_templates)))
-
-                        for qidx in range(len(unique_tup)):
-                            q_id = self.question_id[unique_tup[qidx][1]]
-                            l_id = self.logicalform_id[logical_form_template]
-                            self.filewriter_forlform.writerow(
-                                [unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [
-                                    logical_form_template])
 
         return answer_out
 
@@ -828,7 +814,7 @@ class GenerateRelationsQuestions():
             self.symptoms_to_problem[Noteid][concept_cluster_1].append(val2)
             self.problems_to_symptom[Noteid][concept_cluster_2].append(val1)
 
-    def AnswerSubFunction(self, answertype, val1, val2, Noteid, relate):
+    def AnswerSubFunction(self, answertype, val1, val2, Noteid, relate, question_lines, question_start_line, question_start_token):
 
         try:
             concept_cluster_1 = self.Entity_to_CoreferenceCluster_map[Noteid][val1[1].replace("1", "")][
@@ -848,7 +834,10 @@ class GenerateRelationsQuestions():
 
         ######################## rules for test answers ########################
         if answertype == "yes/no" or answertype == "abnormal" or answertype == "yes":
-            answer = ["yes"]
+            answer = ["yes"]* len(question_lines)
+            answer_line.extend(question_lines)
+            result_start_line.extend(question_start_line)
+            result_start_token.extend(question_start_token)
         elif answertype == "tests_investigated":
             tests = self.map_tests_to_problem_investigated[Noteid][concept_cluster_2]
             for test in tests:
@@ -893,7 +882,10 @@ class GenerateRelationsQuestions():
                     result_start_line.append(int(problem[3]))
                     result_start_token.append(int(problem[4]))
             except:
-                answer = ["no"]
+                answer = ["no"]*len(question_lines)
+            answer_line.extend(question_lines)
+            result_start_line.extend(question_start_line)
+            result_start_token.extend(question_start_token)
 
         elif answertype == "problems_investigated":
             problems = self.map_problems_to_test_investigated[Noteid][concept_cluster_1]
@@ -954,7 +946,10 @@ class GenerateRelationsQuestions():
                     result_start_line.append(int(event[3]))
                     result_start_token.append(int(event[4]))
         elif answertype == "no":
-            answer = ["no"]
+            answer = ["no"]*len(question_lines)
+            answer_line.extend(question_lines)
+            result_start_line.extend(question_start_line)
+            result_start_token.extend(question_start_token)
         elif answertype == "problems_check_conducted":
             events = self.map_problems_to_treatment[Noteid][concept_cluster_1]
 
@@ -1066,29 +1061,25 @@ class GenerateRelationsQuestions():
 
         return [answer, answer_line, result_start_line, result_start_token]
 
-    def MakeQuestion_new(self, types_to_replace, annotations, question_list, logical_form_template, Coreferences,
-                         Noteid):
+    def MakeQuestion_new(self, types_to_replace, annotations, question_list, logical_form_template, Coreferences, Noteid):
 
         new_question_list = []
         question_start_line = []
+        question_start_token = []
         question_line = []
 
         rwords = list(types_to_replace)
         for idx in range(len(rwords)):
             question_start_line.append(int(annotations[rwords[idx]][2]))
+            question_start_token.append(int(annotations[rwords[idx]][3]))
             question_line.append(annotations[rwords[idx]][1])
-            # print(annotations[rwords[idx]])
+
             (t1, valid_list) = self.CheckIfConceptValid(annotations[rwords[idx]], rwords[idx], Coreferences)
             if t1 == None:
                 if valid_list != None:
-                    replace_annoation = random.choice(valid_list)  ### can be improved forQL forms
+                    replace_annoation = random.choice(valid_list)  ### all of them can be used for QL forms (more training data)
                     # print(annotations[rwords[idx]])
                     rwords[idx] = replace_annoation
-
-                    # print(Noteid)
-                    # print(valid_list)
-                    # print(replace_annoation)
-                    # print(question_list)
                 else:
                     return None
             else:
@@ -1111,47 +1102,14 @@ class GenerateRelationsQuestions():
         idx = 0
         done = []
         for types in list(types_to_replace):
-            # temp = qwords
             index = logical_form_template.find("|" + types + "|")
-            # print(done, types,idx)
             if index == -1 and types not in done:
                 print(logical_form_template, "|" + types + "|", done, types)
             done.append(types)
             logical_form_template = logical_form_template.replace("|" + types + "|", rwords[idx])
             idx += 1
 
-        return [new_question_list, logical_form_template, question_line, question_start_line]
-
-    def MakeQuestion(self, dup_rwords, annotations, qwords, Coreferences):
-
-        if len(set(dup_rwords)) != len(dup_rwords):
-            pass
-        else:
-            rwords = list(dup_rwords)
-            question_start_line = []
-            question_line = []
-
-            for idx in range(len(rwords)):
-                question_start_line.append(int(annotations[rwords[idx]][2]))
-                question_line.append(annotations[rwords[idx]][1])
-                # print(annotations[rwords[idx]])
-                (t1, valid_list) = self.CheckIfConceptValid(annotations[rwords[idx]], rwords[idx], Coreferences)
-                if t1 == None:
-                    if valid_list != None:
-                        replace_annoation = random.choice(valid_list)
-                        rwords[idx] = replace_annoation
-                        print()
-                    else:
-                        return None
-                else:
-                    rwords[idx] = t1
-
-            temp = qwords
-            temp[1:len(qwords):2] = rwords
-            temp = [word for word in temp if word != ""]
-            question = " ".join(temp)  ### Make Question ###
-
-        return [question, question_line, question_start_line]
+        return [new_question_list, logical_form_template, question_line, question_start_line, question_start_token]
 
     ######################## Supporting Utility Functions ######################################
 
@@ -1219,19 +1177,18 @@ class GenerateRelationsQuestions():
         return filter
 
     def CheckForCoreferences(self,concept, type ,Coreferences):
+
         self.count_corefs += 1
         valid_list = []
         if type == "problem1" or type == "problem2":
-            type= "problem"
+            type = "problem"
         try:
             coref_lists = Coreferences[type]
         except:
             #print(type,Coreferences.keys())
             return None
 
-        #print(coref_lists, concept)
         for coref_list in coref_lists:
-
             if concept in coref_list:
 
                 #print(concept[0],zip(*coref_list)[0])
@@ -1248,17 +1205,22 @@ class GenerateRelationsQuestions():
             self.resolved_corefs += 1
             return valid_list
         else:
+
             return None
 
     def CheckIfConceptValid(self,val, type, Coreferences):
 
         t1 = self.SimplePreProcess(val[0])
         valid_list = None
-        if t1 == None: ## currently only looking for coreference is we orginal word is not valid, can use it to change orginal concepts as well ###
+
+        ## currently only looking for coreference if orginal word is not valid, can use it to change orginal concepts as well ###
+
+        if t1 == None:
             valid_list = self.CheckForCoreferences(val, type ,Coreferences)
             #print(val[0],valid_list,Coreferences[type])
         else:
             pass
+
         return (t1,valid_list)
 
         # If atelast one of the concept is a common noun ignore the relation
