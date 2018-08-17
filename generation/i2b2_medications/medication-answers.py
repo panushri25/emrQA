@@ -57,7 +57,8 @@ class GenerateQA():
             "list",
             "event",
             "temporal",
-            "certainty"]  # very few annotations are tagged with these, hence we willl ignore them.
+            "certainty"
+        ]  # very few annotations are tagged with these, hence we willl ignore them.
 
         self.MedicationData = []
         ClinicalNotes = {}
