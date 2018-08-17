@@ -19,7 +19,6 @@ Some statistics of the generated data:
 | Datasets | QA pairs | QL pairs | #Notes | 
 | :------: | :------: | :------: | :----: | 
 | i2b2 relations | 141,783 | 1,061,710 | 426 |
-| :------------: | :-----: | :-------: | :-: | 
 | i2b2 relations | 141,783 | 1,061,710 | 426 |
 
 ## Requirements
