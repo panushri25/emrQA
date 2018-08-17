@@ -7,30 +7,26 @@ import random
 
 
 ## i2b2 file paths ##
-
 DosageFilePath = [
     "/home/anusri/Desktop/IBM/i2b2/medication/annotations_ground_truth/converted.noduplicates.sorted/",
-        "/home/anusri/Desktop/IBM/i2b2/medication/training.ground.truth/"]
+    "/home/anusri/Desktop/IBM/i2b2/medication/training.ground.truth/"]
 
 MedicationClinicalNotes = ["/home/anusri/Desktop/IBM/i2b2/medication/train.test.released.8.17.09/"]
 
 ## template file path ##
-
 template_file_path = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
 
 ## output file paths ##
-
 qa_output = "/home/anusri/Desktop/emrQA/output/medication-qa.csv"
 ql_output = "/home/anusri/Desktop/emrQA/output/medication-ql.csv"
 medications_qa_output_json = "/home/anusri/Desktop/emrQA/output/medication-qa.json"
 medications_ql_output_json = "/home/anusri/Desktop/emrQA/output/medication-ql.json"
 
 ### write to csv file for viz ##
+qa_csv_write = False
 
-qa_csv_write  = False
 
 class GenerateQA():
-
 
     DosageFilePath = DosageFilePath
     MedicationClinicalNotes = MedicationClinicalNotes
@@ -42,12 +38,26 @@ class GenerateQA():
 
     def ReadMedicationData(self):
 
-        ## based on format of the i2b2 files. please refer to the i2b2 medications challenge documentation for details ###
+        # based on format of the i2b2 files. please refer to the i2b2 medications
+        # challenge documentation for details ###
 
-        abbs = {"m": "medication", "do": "dosage", "mo": "mode", "f": "frequency", "du": "duration", "r": "problem",
-                "e": "event", "t": "temporal", "c": "certainty", "ln": "list"}
-        exception = ["list", "event", "temporal",
-                     "certainty"]  ## very few annotations are tagged with these, hence we willl ignore them.
+        abbs = {
+            "m": "medication",
+            "do": "dosage",
+            "mo": "mode",
+            "f": "frequency",
+            "du": "duration",
+            "r": "problem",
+            "e": "event",
+            "t": "temporal",
+            "c": "certainty",
+            "ln": "list"
+        }
+        exception = [
+            "list",
+            "event",
+            "temporal",
+            "certainty"]  # very few annotations are tagged with these, hence we willl ignore them.
 
         self.MedicationData = []
         ClinicalNotes = {}
@@ -71,7 +81,7 @@ class GenerateQA():
                 note_id = note_id.split("_")[0]
                 # print(file)
                 dictionary = {note_id: []}
-                PatientNote = ClinicalNotes[note_id]  ## access the corresponding clinical note.
+                PatientNote = ClinicalNotes[note_id]  # access the corresponding clinical note.
                 flag = 0
                 for line in remote_file:
                     med_list = {}
@@ -81,14 +91,16 @@ class GenerateQA():
                     for word in words:
                         term = word.split("=")
                         try:
-                            type = abbs[term[0].strip()]  ## check if all of them lie within the given annotation list
+                            # check if all of them lie within the given annotation list
+                            type = abbs[term[0].strip()]
                         except:
                             print(paths + file)
                             flag = 1
                             break
 
                         full_annotation = "=".join(term[1:])
-                        index = [pos for pos, char in enumerate(full_annotation) if char == "\""]
+                        index = [pos for pos, char in
+                                 enumerate(full_annotation) if char == "\""]
                         pos1 = int(index[0])
                         pos2 = int(index[-1])
 
@@ -98,7 +110,11 @@ class GenerateQA():
                         line_in_note = ""
                         start_line = None
                         if annotation == "nm" or type in exception:
-                            med_list[type] = [annotation, line_in_note, start_line]
+                            med_list[type] = [
+                                annotation,
+                                line_in_note,
+                                start_line
+                            ]
                             continue
 
                         # print(word,annotation,indxs)
@@ -112,17 +128,24 @@ class GenerateQA():
                             end_line = out[1].split(":")[0]
                             end_token = out[1].split(":")[1]
 
-                            line_in_note += ",".join(PatientNote[int(start_line) - 1:int(end_line)])
+                            line_in_note += ",".join(
+                                PatientNote[
+                                    int(start_line) - 1:int(end_line)])
 
                             # if int(end_line) > int(start_line):
                             #    print(type)
                             #    print(line)
                             #    print(end_line,start_line)
 
-                            ## some end line number are greater than start line numbers. annotation line_in_note can span upto 3 lines
-                            ## annotation  can be discontinous set of tokens
+                            # some end line number are greater than start line numbers. annotation line_in_note can span upto 3 lines
+                            # annotation  can be discontinous set of tokens
 
-                        med_list[type] = [annotation, line_in_note, start_line, start_token]
+                        med_list[type] = [
+                            annotation,
+                            line_in_note,
+                            start_line,
+                            start_token
+                        ]
 
                         # if start_line != end_line:
                         #   print(int(end_line)-int(start_line))
@@ -135,7 +158,6 @@ class GenerateQA():
                 if flag == 0:
                     self.MedicationData.append((dictionary, PatientNote))
 
-
                     # print(annotations_span)
 
     def ReadTemplates(self):
@@ -143,14 +165,19 @@ class GenerateQA():
         self.medications_out = {"paragraphs": [], "title": "medication"}
         self.logical_out = []
 
-        ########################################## Set File Paths ##############################################
-
+        ########################################## Set File Paths ################
 
         ### File to write Question-Answers ##
 
-        ofile = open(qa_output,"w")
+        ofile = open(qa_output, "w")
         self.filewriter = csv.writer(ofile, delimiter="\t")
-        self.filewriter.writerow(["Question", "Logical Form" ,"Answer", "Answer line in note",  "Note ID", "Difference in QA lines"])
+        self.filewriter.writerow([
+            "Question",
+            "Logical Form",
+            "Answer",
+            "Answer line in note",
+            "Note ID",
+            "Difference in QA lines"])
 
         ### File to write Question-Logical Forms ##
 
@@ -171,13 +198,17 @@ class GenerateQA():
                 continue
             med_lines.append(line)
 
-        ########################################## Main Function Call ##############################################
+        ########################################## Main Function Call ############
 
-        for (dictionary,PatientNote) in self.MedicationData:
+        for (dictionary, PatientNote) in self.MedicationData:
             for note_id in dictionary:
-                out_patient = {"note_id": note_id, "context": PatientNote, "qas": []}
+                out_patient = {
+                    "note_id": note_id,
+                    "context": PatientNote,
+                    "qas": []
+                }
 
-                med_list = dictionary[note_id] ## extract all the annotations given per note ##
+                med_list = dictionary[note_id]  # extract all the annotations given per note ##
 
                 ## create one to many mappings, to use them for QA. Coreference not resolved ##
 
@@ -194,35 +225,58 @@ class GenerateQA():
                     logical_form = line[3].strip()
 
                     #question = question.replace("|problem| or |problem|","|problem|")
-                    question = question.replace("|medication| or |medication|", "|medication|")
-                    question = question.replace("|problem| or |problem|", "|problem|")
-                    question = question.replace("|test| or |test|", "|test|")
-                    question = question.replace("|test| |test| |test|", "|test|")
+                    question = question.replace(
+                        "|medication| or |medication|",
+                        "|medication|"
+                    )
+                    question = question.replace(
+                        "|problem| or |problem|",
+                        "|problem|"
+                    )
+                    question = question.replace(
+                        "|test| or |test|",
+                        "|test|"
+                    )
+                    question = question.replace(
+                        "|test| |test| |test|",
+                        "|test|"
+                    )
                     question = question.replace("\t", "")
                     logical_form = logical_form.replace("\t", "")
 
                     if question.strip() == "":
                         continue
 
-                    answer_out = self.MakeMedicationQLA(question,logical_form,answertype,med_list,flag,note_id,PatientNote,question_id)
+                    answer_out = self.MakeMedicationQLA(
+                        question,
+                        logical_form,
+                        answertype,
+                        med_list,
+                        flag,
+                        note_id,
+                        PatientNote,
+                        question_id
+                    )
 
                     if len(answer_out) != 0:
-                        #for answer in answer_out:
-                            #print(answer["id"])
+                        # for answer in answer_out:
+                            # print(answer["id"])
                         out_patient["qas"].extend(answer_out)
             self.medications_out["paragraphs"].append(out_patient)
 
-        ################################################################# Dump JSON ###########################################
+        # Dump JSO
 
         json_out = medications_qa_output_json
         with open(json_out, 'w') as outfile:
-            json.dump(self.medications_out, outfile, ensure_ascii=False) ## storage format same as SQUAD
+            # storage format same as SQUAD
+            json.dump(self.medications_out, outfile, ensure_ascii=False)
 
         #json_out = medications_ql_output_json
-        #with open(json_out, 'w') as outfile:
-        #    json.dump(self.logical_out, outfile, ensure_ascii=False) ## storage format, question logical_form question_id logicalfrom_id source
+        # with open(json_out, 'w') as outfile:
+        # json.dump(self.logical_out, outfile, ensure_ascii=False) ## storage
+        # format, question logical_form question_id logicalfrom_id source
 
-    def MakeMedicationRelationMappings(self,med_list):
+    def MakeMedicationRelationMappings(self, med_list):
 
         self.map_meds_to_reasons = {}
         self.map_meds_to_dosages = {}
@@ -231,12 +285,13 @@ class GenerateQA():
         self.map_meds_to_durations = {}
         self.medications_all = {}
 
-
         for med_annotations in med_list:
 
             if med_annotations["medication"][0] not in self.medications_all:
-                self.medications_all[med_annotations["medication"][0]] = [med_annotations["medication"]]
-                #print(med_annotations["medication"])
+                self.medications_all[med_annotations["medication"][0]] = [
+                    med_annotations["medication"]
+                ]
+                # print(med_annotations["medication"])
 
             if med_annotations["medication"][0] not in self.map_meds_to_dosages:
                 self.map_meds_to_dosages[med_annotations["medication"][0]] = []
@@ -255,18 +310,37 @@ class GenerateQA():
                 self.map_meds_to_durations[med_annotations["medication"][0]] = []
 
             if med_annotations["dosage"][0] != "nm":
-                #if med_annotations["event"] == ""
-                self.map_meds_to_dosages[med_annotations["medication"][0]].append(med_annotations["dosage"]+med_annotations["list"])
+                # if med_annotations["event"] == ""
+                self.map_meds_to_dosages[med_annotations["medication"][0]].append(
+                    med_annotations["dosage"] + med_annotations["list"]
+                )
             if med_annotations["problem"][0] != "nm":
-                self.map_meds_to_reasons[med_annotations["medication"][0]].append(med_annotations["problem"]+med_annotations["list"])
+                self.map_meds_to_reasons[med_annotations["medication"][0]].append(
+                    med_annotations["problem"] + med_annotations["list"]
+                )
             if med_annotations["problem"][0] != "nm":
-                self.map_reasons_to_meds[med_annotations["problem"][0]].append(med_annotations["medication"]+med_annotations["list"])
+                self.map_reasons_to_meds[med_annotations["problem"][0]].append(
+                    med_annotations["medication"] + med_annotations["list"]
+                )
             if med_annotations["frequency"][0] != "nm":
-                self.map_meds_to_frequency[med_annotations["medication"][0]].append(med_annotations["frequency"]+med_annotations["list"])
+                self.map_meds_to_frequency[med_annotations["medication"][0]].append(
+                    med_annotations["frequency"] + med_annotations["list"]
+                )
             if med_annotations["duration"][0] != "nm":
-                self.map_meds_to_durations[med_annotations["medication"][0]].append(med_annotations["duration"]+med_annotations["list"])
+                self.map_meds_to_durations[med_annotations["medication"][0]].append(
+                    med_annotations["duration"] + med_annotations["list"]
+                )
 
-    def MakeMedicationQLA(self,question_list,logical_form_template, answertype,med_list,flag,note_id,PatientNote,question_id):
+    def MakeMedicationQLA(
+            self,
+            question_list,
+            logical_form_template,
+            answertype,
+            med_list,
+            flag,
+            note_id,
+            PatientNote,
+            question_id):
 
         answer_out = []
 
@@ -278,17 +352,21 @@ class GenerateQA():
         ## check for errors in templates and gather all the placeholders in the templates (placeholders stored in rwords) ##
         ## semantic types of placeholders ##
 
-        dup_rwords_list = self.CheckForErrors(intial_question_list, orginal_logical_form_template)
+        dup_rwords_list = self.CheckForErrors(
+            intial_question_list,
+            orginal_logical_form_template
+        )
         if dup_rwords_list == None:
             return answer_out
 
-        for med_annotations in med_list:  ## Medlist is a list of dictionaries (each dict is a medication and its attributes)
+        # Medlist is a list of dictionaries (each dict is a medication and its attributes)
+        for med_annotations in med_list:
 
             flag = 0
             logical_form_template = orginal_logical_form_template
-            if len(dup_rwords_list) != 1: ## sanity check
+            if len(dup_rwords_list) != 1:  # sanity check
                 print("Check Question_Logical Form Mapping")
-                print(dup_rwords_list,intial_question_list)
+                print(dup_rwords_list, intial_question_list)
                 print(logical_form_template)
                 return answer_out
             else:
@@ -302,7 +380,8 @@ class GenerateQA():
 
             answer = []
 
-            ### checking if  placeholder values to be used in question is "nm" (not mentioned), if yes set flag to 1  ##
+            # checking if  placeholder values to be used in question is "nm" (not
+            # mentioned), if yes set flag to 1  ##
 
             if rwords != ["time"]:
                 for idx in range(len(rwords)):
@@ -314,16 +393,32 @@ class GenerateQA():
                         break
                     else:
                         line_num.append(int(med_annotations[rwords[idx]][2]))
-                        line_token.append(int(med_annotations[rwords[idx]][3]))
-                        question_line.append(med_annotations[rwords[idx]][1])
+                        line_token.append(
+                            int(med_annotations[rwords[idx]][3])
+                        )
+                        question_line.append(
+                            med_annotations[rwords[idx]][1]
+                        )
                         rwords[idx] = med_annotations[rwords[idx]][0]
                         quest_list_nar.append(med_annotations["list"][0])
 
             ## Generate question, logical form and answer only if flag is 0 ##
 
             if flag == 0:
-                [paraphrase_questions, tuple_orginal, logical_form] = self.MakeMedicationQL(rwords, intial_question_list, logical_form_template, dup_rwords)
-                [answer, answer_line, result_num, result_token, list_nar] = self.MakeAnswer(quest_list_nar, answertype, med_annotations, question_line, line_num,line_token)
+                [paraphrase_questions, tuple_orginal, logical_form] = self.MakeMedicationQL(
+                    rwords,
+                    intial_question_list,
+                    logical_form_template,
+                    dup_rwords
+                )
+                [answer, answer_line, result_num, result_token, list_nar] = self.MakeAnswer(
+                    quest_list_nar,
+                    answertype,
+                    med_annotations,
+                    question_line,
+                    line_num,
+                    line_token
+                )
             else:
                 continue
                 #return  answer_out  #### bug fixed ##
@@ -331,7 +426,12 @@ class GenerateQA():
             if len(answer) != 0:
 
                 ## maximum distance between the question line and answer line ##
-                perms = list(itertools.product(result_num+line_num, result_num+line_num))
+                perms = list(
+                    itertools.product(
+                        result_num + line_num,
+                        result_num + line_num
+                    )
+                )
                 diffs = [abs(val1 - val2) for (val1, val2) in perms]
                 difference = max(diffs)
 
@@ -339,7 +439,9 @@ class GenerateQA():
                 list_nar = ",".join(list_nar)
 
                 unique_paras = set(paraphrase_questions)
-                if unique_paras not in self.unique_questions: ## redundancy check: checking if these set of questions are unique for every clinical note ##
+                # redundancy check: checking if these set of questions are unique for
+                # every clinical note ##
+                if unique_paras not in self.unique_questions:
 
                     self.unique_questions.append(unique_paras)
                     question_id += 1
@@ -356,7 +458,7 @@ class GenerateQA():
                             if evidence_temp_line[pdx] not in evidence_answer:
                                 evidence_answer.append(evidence_temp_line[pdx])
                                 evidence_start.append(evidence_temp_start[pdx])
-                                
+
                          val = {"answer_start": [start_line, start_token], "text": answer[idx],
                                          "evidence": evidence_answer,
                                          "evidence_start": evidence_start}
@@ -367,41 +469,64 @@ class GenerateQA():
 
                         if qa_csv_write:
                             self.filewriter.writerow(
-                                ["##".join(list(unique_paras))] + [logical_form] + [",".join(set(answer))] + [Note_val] + [
-                                    note_id + "_MedicationsChallenge"] + [difference] + [list_nar])
+                                ["##".join(list(unique_paras))]
+                                + [logical_form]
+                                + [",".join(set(answer))]
+                                + [Note_val]
+                                + [note_id + "_MedicationsChallenge"]
+                                + [difference]
+                                + [list_nar]
+                            )
 
-
-                        val = {"answer_start": [start_line, start_token], "text": answer[idx],
-                                         "evidence": answer_line[idx],
-                                         "evidence_start": result_num[idx]}
+                        val = {
+                            "answer_start": [start_line, start_token],
+                            "text": answer[idx],
+                            "evidence": answer_line[idx],
+                            "evidence_start": result_num[idx]
+                        }
 
                         if val not in ans_list:
                             ans_list.append(val)
 
-                    answer_temp = {"answers": ans_list, "id": [tuple_orginal,intial_template], "question": list(unique_paras), "orginal_template": intial_template}
+                    answer_temp = {
+                        "answers": ans_list,
+                        "id": [tuple_orginal, intial_template],
+                        "question": list(unique_paras),
+                        "orginal_template": intial_template
+                    }
                     answer_out.append(answer_temp)
 
         return answer_out
 
-    def MakeMedicationQL(self, rwords, question_list, logical_form_template, dup_rwords):
+    def MakeMedicationQL(
+        self,
+        rwords,
+        question_list,
+        logical_form_template,
+        dup_rwords
+    ):
 
         intial_template = logical_form_template
         paraphrase_questions = []
         tuple_orginal = []
 
         if rwords == ["time"]:
-            time = str(random.randint(2, 5)) + random.choice([" years", " weeks"])
+            time = str(random.randint(2, 5))\
+                + random.choice([" years", " weeks"])
             for question in question_list:
                 original = question
                 question = question.replace("|time|", time)
-            logical_form_template = logical_form_template.replace("|time|", time)
+            logical_form_template = logical_form_template.replace(
+                "|time|",
+                time
+            )
             rwords = []
             dup_rwords = []
             paraphrase_questions.append(question)
             tuple_orginal.append((question, original))
         else:
 
-            ############################ make questions ############################################
+            ############################ make questions ##############################
 
             for question in question_list:
                 orginal = question
@@ -412,13 +537,15 @@ class GenerateQA():
                     index = question.find("|" + types + "|")
                     if index == -1 and types not in done:
                         print(question, "|" + types + "|", done)
-                    question = question.replace("|" + types + "|", rwords[idx])
+                    question = question.replace(
+                        "|" + types + "|",
+                        rwords[idx])
                     done.append(types)
                     idx += 1
                 tuple_orginal.append((question, orginal))
                 paraphrase_questions.append(question)
 
-                ###################################### Make Logical Form #################################
+                ###################################### Make Logical Form #################
 
                 ## tab ##
             idx = 0
@@ -427,10 +554,18 @@ class GenerateQA():
                 logical_form_template.replace("|treatment|", "|medication")
                 index = logical_form_template.find("|" + types + "|")
                 if index == -1 and types not in done:
-                    print(logical_form_template, "|" + types + "|", done, types)
+                    print(
+                        logical_form_template,
+                        "|" + types + "|",
+                        done,
+                        types
+                    )
                 done.append(types)
 
-                logical_form_template = logical_form_template.replace("|" + types + "|", rwords[idx])
+                logical_form_template = logical_form_template.replace(
+                    "|" + types + "|",
+                    rwords[idx]
+                )
                 idx += 1
 
         logical_form = logical_form_template
@@ -439,11 +574,23 @@ class GenerateQA():
 
         for (question, orginal) in tuple_orginal:
             self.filewriter_forlform.writerow(
-                [question] + [logical_form.strip()] + [orginal.strip()] + [intial_template])
+                [question]
+                + [logical_form.strip()]
+                + [orginal.strip()]
+                + [intial_template]
+            )
 
         return [paraphrase_questions, tuple_orginal, logical_form]
 
-    def MakeAnswer(self, quest_list_nar, answertype, med_annotations, question_list,line_num,line_token):
+    def MakeAnswer(
+        self,
+        quest_list_nar,
+        answertype,
+        med_annotations,
+        question_list,
+        line_num,
+        line_token
+    ):
 
         result_num = []
         result_token = []
@@ -455,13 +602,14 @@ class GenerateQA():
         if answertype[idx] == "yes":
 
             ### the question line is evidence for yes or no questions ##
-            answer = ["yes"]*len(question_list)
+            answer = ["yes"] * len(question_list)
             answer_line.extend(question_list)
             result_num.extend(line_num)
             result_token.extend(line_token)
             list_nar.extend(quest_list_nar)
         elif answertype == ["problem"]:
-            for listr in self.map_meds_to_reasons[med_annotations["medication"][0]]:
+            for listr in self.map_meds_to_reasons[
+                    med_annotations["medication"][0]]:
                 answer += [listr[0]]
                 answer_line.append(listr[1])
                 result_num.append(int(listr[2]))
@@ -469,7 +617,8 @@ class GenerateQA():
                 list_nar.append(listr[3])
         elif answertype == ["frequency"]:
             # print("frequency")
-            for listr in self.map_meds_to_frequency[med_annotations["medication"][0]]:
+            for listr in self.map_meds_to_frequency[
+                    med_annotations["medication"][0]]:
                 answer += [listr[0]]
                 answer_line.append(listr[1])
                 result_num.append(int(listr[2]))
@@ -484,7 +633,8 @@ class GenerateQA():
                     result_token.append(int(listr[3]))
                     list_nar.append(listr[3])
         elif answertype == ["medication"]:
-            for listr in self.map_reasons_to_meds[med_annotations["problem"][0]]:
+            for listr in self.map_reasons_to_meds[
+                    med_annotations["problem"][0]]:
                 answer += [listr[0]]
                 answer_line.append(listr[1])
                 result_num.append(int(listr[2]))
@@ -493,16 +643,19 @@ class GenerateQA():
         elif answertype == ["medication", 'dosage']:
             meds = self.map_reasons_to_meds[med_annotations["problem"][0]]
             for med in meds:
-                dos = ",".join([x[0] for x in self.map_meds_to_dosages[med[0]]])
+                dos = ",".join(
+                    [x[0] for x in self.map_meds_to_dosages[med[0]]])
                 answer += ["( " + med[0] + ", " + dos + ")"]
                 #answer += [dos]
                 answer_line.append(med[1])
-                answer_line.extend([x[1] for x in self.map_meds_to_dosages[med[0]]])
+                answer_line.extend(
+                    [x[1] for x in self.map_meds_to_dosages[med[0]]])
                 result_num.extend([int(med[2])])
                 result_token.extend([int(med[3])])
                 result_num.extend([int(x[2]) for x in self.map_meds_to_dosages[med[0]]])
                 result_token.extend([int(x[3]) for x in self.map_meds_to_dosages[med[0]]])
-                list_nar.extend([x[3] for x in self.map_meds_to_dosages[med[0]]])
+                list_nar.extend(
+                    [x[3] for x in self.map_meds_to_dosages[med[0]]])
                 list_nar.append(med[3])
         elif answertype == ["duration"]:
             for listr in self.map_meds_to_durations[med_annotations["medication"][0]]:
@@ -525,7 +678,7 @@ class GenerateQA():
             print(answertype)
             answer = []
 
-        return [answer,answer_line, result_num, result_token, list_nar]
+        return [answer, answer_line, result_num, result_token, list_nar]
 
     def CheckForErrors(self, question_list, logical_form_template):
 
@@ -540,8 +693,14 @@ class GenerateQA():
         for question in question_list:
             if question.strip() == "":
                 continue
-            question = question.replace("|medication| or |medication|", "|medication|")
-            question = question.replace("|problem| or |problem|", "|problem|")
+            question = question.replace(
+                "|medication| or |medication|",
+                "|medication|"
+            )
+            question = question.replace(
+                "|problem| or |problem|",
+                "|problem|"
+            )
             question = question.replace("|test| or |test|", "|test|")
             question = question.replace("|test| |test| |test|", "|test|")
             question = question.strip()
@@ -574,5 +733,5 @@ class GenerateQA():
 
         return dup_rwords_list
 
-if __name__=="__main__":
+if __name__ == "__main__":
     GenerateQA()
