@@ -1,51 +1,20 @@
 from nltk.stem import WordNetLemmatizer
-from nltk.corpus import wordnet as wn
 import nltk
-import operator
 from nltk.corpus import stopwords
-import sys
-sys.path.insert(0, '/home/anusri/Desktop/IBM/GetUMLS/QuickUMLS')
-import quickumls
-matcher = quickumls.QuickUMLS("/home/anusri/Desktop/IBM/GetUMLS/installation")
 
 ## Open common names to use in is_common_noun function ##
-file = open("common_names.txt")
+file = open("/home/anusri/Desktop/emrQA/generation/i2b2_relations/common_names.txt") ## you can use any set of common nouns to filter, here we call the top 500 high frequency words occuring in our templates as commoun nouns ##
 data = file.readlines()
 file.close()
 common_nouns = [line.strip() for line in data]
 
-## GEt Stop words ##
+## Get Stop words ##
+
 stopWords = set(stopwords.words('english'))
-
-## Get UMLS semantic mapping ##
-sfile = open("/home/anusri/Desktop/IBM/GetUMLS/QuickUMLS/SemanticTypes_2013AA.txt")
-data = sfile.readlines()
-sfile.close()
-mapping = {}
-for line in data:
-    words = line.split("|")
-    short_type = words[1]
-    full_type = words[0]
-    mapping[short_type] = full_type
-
 lemmatizer = WordNetLemmatizer()
 
-## Configure Concept Filters ##
-concept_filters = {"problem": ["dsyn","fndg","sosy","patf","mobd","neop","acab","anab"],
-                       "test": ["diap","lbpr","clna","topp","lbtr","enzy","aapp"],
-                       "treatment": ["phsu","topp","antb","orch","medd"],
-                        "medication": ["phsu","orch","aapp","horm","antb","vita","topp"]}
-out_list = concept_filters["problem"] + concept_filters["test"] + concept_filters["treatment"] + concept_filters["medication"]
-
-disease = ["dsyn","neop"]
-symptoms = ["sosy"]
-mental_disease = ["mobd"]
-abnormality = ["acab","anab","comd"]
-bacteria = ["patf"]
-injury = ["inpo"]
-lab_result = ["qnco","lbpr","lbtr", "fndg"]
-
 ## Functions For Use ##
+
 def concept_is_CommonNoun(concept):
     '''
     Return 1 if the concept is a common noun
@@ -84,6 +53,7 @@ def concept_is_CommonNoun(concept):
         print(" ".join(words).strip(), tags)
     '''
     return flag
+
 def concept_is_PastTense(concept):
     '''
     Return 1 if the concept ends in past tense
@@ -104,6 +74,24 @@ def concept_is_PastTense(concept):
         flag = 0
 
     return flag
+
+'''
+import sys
+sys.path.insert(0, '/home/anusri/Desktop/IBM/GetUMLS/QuickUMLS')
+import quickumls
+matcher = quickumls.QuickUMLS("/home/anusri/Desktop/IBM/GetUMLS/installation")
+
+## Get UMLS semantic mapping ##
+sfile = open("/home/anusri/Desktop/IBM/GetUMLS/QuickUMLS/SemanticTypes_2013AA.txt")
+data = sfile.readlines()
+sfile.close()
+mapping = {}
+for line in data:
+    words = line.split("|")
+    short_type = words[1]
+    full_type = words[0]
+    mapping[short_type] = full_type
+    
 def concept_is_Disease(concept):
     #if concept_is_CommonNoun(concept) == 1:
      #   return 0
@@ -206,12 +194,8 @@ def CheckSemanticType(text):
 
 ## Functions for script check ##
 
-
-
 #TenseFilter()
 
-
-            
 
 def determine_tense_input(sentance):
     text = nltk.word_tokenize(sentance)
@@ -254,3 +238,5 @@ def TenseFilter():
     print(future)
 
 #FilterCommonNouns()
+
+'''
