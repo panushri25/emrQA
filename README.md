@@ -5,11 +5,19 @@
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
 emrQA: A Large Corpus for Question Answering on Electronic Medical Records,  
 In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, Brussels, Belgium.
-
-- The data can be generated using the NLP Datasets from the [i2b2 Challenges][i2b2-datasets], which are accessible by everyone subject to a license agreement. 
 - Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu)  for suggestions and comments.
 
+## Quick Links
 
+- [About](#emrqa)
+- [Demo](#demo)
+- [Data Generation](#generation)
+- [Data Analysis](#analysis
+- [Baselines](#baselines)
+
+Electronic Medical Records (EMRs) are a longitudinal record of a patient's health information in the form of unstructured clinical notes (progress notes, discharge summaries etc.) and structured vocabularies. Physicians wish to answer questions about medical entities and relations from the EMR, requiring a deeper understanding of clinical notes.
+In this work, we address the lack of any publicly available EMR QA corpus by creating a large-scale dataset, emrQA, using a novel generation framework that allows for minimal expert involvement and re-purposes existing annotations available for other clinical NLP tasks (i2b2 challenge datasets). 
+e data can be generated using the NLP Datasets from the [i2b2 Challenges][i2b2-datasets], which are accessible by everyone subject to a license agreement. 
 In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
 
 
