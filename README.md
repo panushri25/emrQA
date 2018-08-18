@@ -11,8 +11,8 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 
 - [About](#question-answering-on-electronic-medical-records)
 - [Requirements](#requirements)
-- [Data Generation](#generation)
-- [Data Analysis](#analysis)
+- [Data Generation](#emrqa-generation)
+- [Data Analysis](#emrqa-analysis)
 - [Baselines](#baselines)
 
 ##  Question Answering on Electronic Medical Records
@@ -47,12 +47,13 @@ Run the following commands to clone the repository and install DrQA:
 git clone https://github.com/facebookresearch/DrQA.git
 cd DrQA; pip install -r requirements.txt; python setup.py develop
 ```
+To generate emrQA, first [download](#downloading-i2b2) the i2b2 challenge datasets. 
 
-## Generation
+**Important: Navigate through all the files in the generation folder and set the i2b2 folder paths and the output folder paths as indicated in the script.** 
 
-To generate emrQA, first [download](#downloading-i2b2) the i2b2 challenge datasets. **Important: Navigate through all the files in the generation folder and set the i2b2 folder paths and the output folder paths as indicated in the script.** 
-  
-Run `python main.py` to generate the question-answers pairs in a json format and the question-logical form pairs in a csv format.  A thorough discussion of the output format of these files is presented below.
+## emrQA Generation
+
+ Run `python main.py` to generate the question-answers pairs in a json format and the question-logical form pairs in a csv format.  A thorough discussion of the output format of these files is presented below.
 
 ### Question-Answer Format
 
@@ -64,7 +65,7 @@ Run `python main.py` to generate the question-answers pairs in a json format and
 
 
 
-## Data Analysis
+## emrQA Analysis
 
 ## Baselines
 
