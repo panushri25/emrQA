@@ -55,13 +55,13 @@ To generate emrQA, first [download](#downloading-i2b2) the i2b2 challenge datase
 
  Run `python main.py` to generate the question-answers pairs in a json format and the question-logical form pairs in a csv format.  A thorough discussion of the output format of these files is presented below.
 
-### Question-Answer Format
+#### Question-Answer Format
 
 
-### Squad Format
+#### Squad Format
 
 
-### Question-logical form
+#### Question-logical form
 
 
 
