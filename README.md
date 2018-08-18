@@ -60,6 +60,26 @@ To generate emrQA, first [download](#downloading-i2b2) the i2b2 challenge datase
 
 #### Squad Format
 
+The `reader` directory scripts expect the datasets as a `.json` file where the data is arranged like SQuAD:
+
+```
+file.json
+├── "data"
+│   └── [i]
+│       ├── "paragraphs"
+│       │   └── [j]
+│       │       ├── "context": "paragraph text"
+│       │       └── "qas"
+│       │           └── [k]
+│       │               ├── "answers"
+│       │               │   └── [l]
+│       │               │       ├── "answer_start": N
+│       │               │       └── "text": "answer"
+│       │               ├── "id": "<uuid>"
+│       │               └── "question": "paragraph question?"
+│       └── "title": "document id"
+└── "version": 1.1
+```
 
 #### Question-logical form
 
