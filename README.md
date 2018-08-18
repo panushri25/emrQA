@@ -10,18 +10,17 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 ## Quick Links
 
 - [About](#question-answering-on-electronic-medical-records)
-- [Demo](#demo)
+- [Requirements](#requirements)
 - [Data Generation](#generation)
 - [Data Analysis](#analysis)
 - [Baselines](#baselines)
 
 ##  Question Answering on Electronic Medical Records
 
-Electronic Medical Records (EMRs) are a longitudinal record of a patient's health information in the form of unstructured clinical notes (progress notes, discharge summaries etc.) and structured vocabularies. Physicians wish to answer questions about medical entities and relations from the EMR, requiring a deeper understanding of clinical notes.
-In this work, we address the lack of any publicly available EMR QA corpus by creating a large-scale dataset, emrQA, using a novel generation framework that allows for minimal expert involvement and re-purposes existing annotations available for other clinical NLP tasks (i2b2 challenge datasets). 
-e data can be generated using the NLP Datasets from the [i2b2 Challenges][i2b2-datasets], which are accessible by everyone subject to a license agreement. 
-In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
+Electronic Medical Records (EMRs) are a longitudinal record of a patient's health information in the form of unstructured clinical notes (progress notes, discharge summaries etc.) and structured vocabularies. Physicians frequently seek answers to questions from unstructured EMRs to support clinical decision-making. 
+In this work, we address the lack of any publicly available EMR QA corpus by creating a large-scale dataset, emrQA, using a novel generation framework that allows for minimal expert involvement and re-purposes existing annotations available for other clinical NLP tasks (here the i2b2 challenge datasets).
 
+This repository includes code for generating and analyzing the emrQA dataset as described in the paper. Note that this work is a refactored and extended version of the orginal dataset described in the paper.
 
 Some statistics of the generated data:
 
@@ -36,17 +35,18 @@ Some statistics of the generated data:
 | **emrQA** | **479,304** | **1,265,283** | **3,431** |
 
 
-
 ## Requirements
 
-### General
-- Python 2
-- NLP Datasets from [i2b2][i2b2-datasets]
+The data can be generated using the NLP Datasets from the [i2b2 Challenges][i2b2-datasets], which are accessible by everyone subject to a license agreement.  
+In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
 
-### Python Packages
-- nltk
-- json
+The following scrpits require Python 2.7. 
+Run the following commands to clone the repository and install DrQA:
 
+```bash
+git clone https://github.com/facebookresearch/DrQA.git
+cd DrQA; pip install -r requirements.txt; python setup.py develop
+```
 
 ## Generation
 
