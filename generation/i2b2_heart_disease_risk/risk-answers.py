@@ -11,6 +11,29 @@ sys.setdefaultencoding("ISO-8859-1")
 import json
 import random
 #"Glucose":"126 (2 fasting blood glucose measurments)"
+
+###################################################### SET FILE PATHS ##################################################################
+
+## i2b2 file paths ##
+
+RiskFilePath = ["/home/anusri/Desktop/IBM/i2b2/heart-disease-risk/training-RiskFactors-Complete-Set1/"]
+
+## template file path ##
+
+template_file_path = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
+
+## output file paths ##
+
+qa_output = "/home/anusri/Desktop/emrQA/output/risk-qa.csv"
+ql_output = "/home/anusri/Desktop/emrQA/output/risk-ql.csv"
+risk_qa_output_json = "/home/anusri/Desktop/emrQA/output/risk-qa.json"
+
+
+######################################################## CODE #########################################################################
+
+################################################# STANDARD VALUES FROM THE i2b2 heart disease risk paper paper #####################################################################
+
+
 test_value = {"A1C":"6.5", "glucose": "126", "Cholestrol":"240", "LDL":"100 mg/dl", "blood pressure": "140/90 mm/hg", "BMI": "30"}
 dictionary = {}
 dictionary = {"high chol.": ("HYPERLIPIDEMIA","Cholestrol"), "A1C": ("DIABETES","A1C"), "high bp": ("HYPERTENSION","blood pressure"),
@@ -39,891 +62,25 @@ class RiskFileAnalysis():
         self.list_medications = []
         self.types = []
         self.ReadFile()
-        self.Make_Question_Answers_LogicalForms()
+        self.ReadTemplates()
         #self.WriteTimeData()
 
-    def checking_for_errors(self, question_list,logical_form_template):
 
-        question_list = question_list.split("##")
-        qwords_list = []
-        dup_rwords_list = []
-        unique_templates = []
+    ################################ Read the Risk Files #######################################################
 
-        #logical_form_template = logical_form_template.replace("|treatment|", "|medication|").strip()
-
-        for question in question_list:
-            if question.strip() == "":
-                continue
-            #question = question.replace("|medication| or |medication|", "|medication|")
-            #question = question.replace("|treatment|", "|medication|").strip()
-            #logical_form_template.replace()
-            if question not in unique_templates:
-                unique_templates.append(question)
-            else:
-                continue
-
-            qtemplate = question
-            qwords = question.split("|")
-            dup_rwords = qwords[1:len(qwords):2]
-
-            qwords_list.append(qwords)
-
-            if len(dup_rwords_list) == 0:
-                dup_rwords_list = [set(dup_rwords)]
-            else:
-                if set(dup_rwords) not in dup_rwords_list:
-
-                    question = question.replace("|treatment|", "|medication|").strip()
-                    qwords = question.split("|")
-                    dup_rwords = qwords[1:len(qwords):2]
-                    if set(dup_rwords) not in dup_rwords_list:
-                        print("Error Out Of Context Question:")
-                        print(question, logical_form_template, question_list)
-                        return []
-
-        lwords = logical_form_template.split("|")
-        dup_lrwords = lwords[1:len(lwords):2]
-        if set(dup_lrwords) not in dup_rwords_list:
-            print("Error Out Of Context Question-Logical Form Pairs:")
-            print(question_list, logical_form_template)
-            return []
-
-
-        if len(dup_rwords_list) != 1:
-            print("Check Question_Logical Form Mapping")
-            print(dup_rwords_list, question_list)
-            print(logical_form_template)
-            return []
-
-        return dup_rwords_list
-
-    def InputMapping(self,types_to_replace,logicalform, question_list):
-        annotations = []
-        if types_to_replace == ["test"]:
-            annotations = test_annotations
-            return annotations
-        elif types_to_replace == ["test","date"]:
-            annotations = []
-            for test in test_annotations:
-                date = str(2000+random.randint(0,100))+"-"+str(random.randint(1,12))+"-"+str(random.randint(1,28))
-                annotations.append([test[0],date])
-        elif types_to_replace == ["test","time"]:
-            annotations = []
-            for test in test_annotations:
-                time = random.choice(["years ", "weeks "])+str(random.randint(2,5))
-                annotations.append([test[0],time])
-        elif types_to_replace == ["test","time","value"]:
-            annotations = []
-            for test in test_annotations:
-                time = random.choice(["years ", "weeks "])+str(random.randint(2,5))
-                annotations.append([test[0],time,test_value[test[0]]])
-        elif types_to_replace == ["medication"] or types_to_replace == ["treatment"]:
-            annotations = [[meds] for meds in self.list_medications]
-        elif types_to_replace == ["problem"]:
-            annotations = [[prob] for prob in problem_annotations]
-        elif types_to_replace == ["test", "problem"]:
-            annotations = []
-            for problem in disease_test:
-                for test in disease_test[problem]:
-                    annotations.append([dictionary[test][1],problem])
-        elif types_to_replace == ["time"]:
-            time = random.choice(["years ", "weeks "]) + str(random.randint(2, 5))
-            annotations.append([time])
-        elif types_to_replace == ["none"]:
-            pass
-        else:
-            print(types_to_replace)
-
-        return annotations
-
-    def MakeAnswers(self,answertype,types_to_replace,question_list,logical_form, Disease_time_progression, Record_dates,Noteid,offset_notes):
-        QLA = []
-        paraphrase_questions = []
-        non_uniq = []
-        #paraphrase_questions1 = []
-        logical_form_orginal = logical_form
-        if answertype == "none":
-            annotations = self.InputMapping(types_to_replace,question_list,logical_form )
-
-            ################# Generate only Question Logical Forms ##################################
-            for value in annotations:
-
-                logical_form_template = logical_form
-                new_question_list = []
-                for question in question_list:
-                    orginal = question
-                    done = []
-                    idx = 0
-                    for types in list(types_to_replace):
-                        # temp = qwords
-                        index = question.find("|" + types + "|")
-                        if index == -1 and types not in done:
-                            if types == "medication":
-                                question = question.replace("|treatment|","|medication|")
-                                index = question.find("|" + "medication" + "|")
-                                if index == -1 and types not in done:
-                                    print(question, "|" + types + "|", done)
-
-                            else:
-                                print(question, "|" + types + "|", done)
-                        question = question.replace("|" + types + "|", value[idx])
-                        done.append(types)
-                        idx += 1
-                    paraphrase_questions.append(question)
-                    if question not in new_question_list:
-                        new_question_list.append(question)
-                    #paraphrase_questions1.append((orginal,question))
-
-                idx = 0
-                done = []
-                for types in list(types_to_replace):
-                    # temp = qwords
-                    index = logical_form_template.find("|" + types + "|")
-                    # print(done, types,idx)
-                    if index == -1 and types not in done:
-                        print(logical_form_template, "|" + types + "|", done, types)
-                    done.append(types)
-                    logical_form_template = logical_form_template.replace("|" + types + "|", value[idx])
-                    idx += 1
-
-                #for q in new_question_list:
-                #    self.filewriter_forlform.writerow([q] + [logical_form_template])
-
-                unique_tup = list(set(zip(paraphrase_questions, question_list)))
-                for qidx in range(len(unique_tup)):
-
-                    #q_id = self.question_id[unique_tup[qidx][1]]
-                   #l_id = self.logicalform_id[logical_form]
-                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form_template] + [unique_tup[qidx][1]] + [logical_form_orginal])
-                #for (question,orginal) in set(paraphrase_questions1):
-                #    self.filewriter_forlform.writerow([question] + [logical_form_template] + [orginal] + [logical_form_orginal])
-
-            return QLA
-
-        elif answertype == "result_date":
-            for (on_date_disease,record_date,note_offset) in zip(Disease_time_progression,Record_dates,offset_notes):
-                for Diseases in on_date_disease: ## Diseases has a list of Diseases keys
-                     inidcators = on_date_disease[Diseases] ## Get all corresponding indicators for that problem
-                     #print(inidcators)
-                     test_mentions = disease_test[Diseases]
-                     for test in test_mentions: ## on "high bp...
-                         #print(test)
-                         time = []
-                         for annotations in inidcators[test]:
-                             time = inidcators[test][annotations][0]
-
-                         test_name = dictionary[test][1]
-                         disease_name = dictionary[test][0].lower()
-
-                         logical_form_template = logical_form
-                         logical_form_template = logical_form_template.replace("|test|", test_name)
-                         logical_form_template = logical_form_template.replace("|date|", record_date[0])
-
-                         answers = []
-
-                         question_paraphrases = []
-                         for question in question_list:
-                            orginal = question
-                            question = question.replace("|test|", test_name)
-                            question = question.replace("|date|", record_date[0])
-                            if (question, orginal) not in question_paraphrases:
-                                question_paraphrases.append((question, orginal))
-                            non_uniq.append(question)
-                         if "during DCT" in time:
-                            annotations = annotations[0:-2] + (annotations[-2]+note_offset, annotations[-1]+note_offset)
-                            answers.append(annotations)
-                            #print(annotations)
-
-                         QLA.append((question_paraphrases,logical_form_template,answers,non_uniq))
-                            #for value in test_annotations:
-                             #    test_annotations[]
-        elif answertype == "result_value_time":
-
-            year = []
-            month = []
-            day = []
-            for date in Record_dates:
-                try:
-                    values = date[0].split("-")
-                    if int(values[0]) not in year:
-                        year.append(int(values[0]))
-                    if int(values[1]) not in month:
-                        month.append(int(values[1]))
-                    if int(values[2]) not in day:
-                        day.append(int(values[2]))
-                except:
-                    values = date[0].split("/")
-                    if int(values[2]) not in year:
-                        year.append(int(values[2]))
-                    if int(values[1]) not in month:
-                        month.append(int(values[1]))
-                    if int(values[0]) not in day:
-                        day.append(int(values[0]))
-
-            if len(year) > 1:
-                time_val = str(max(year)-min(year)) + " years"
-            elif len(month) > 1:
-                time_val = str(max(month)-min(month)) + " months"
-            else:
-                time_val = str(max(day)-min(day)) + " days"
-            for key in disease_test:
-                Diseases = key
-                test_mentions = disease_test[Diseases]
-                for test in test_mentions:  ## on "high bp...
-
-                    test_name = dictionary[test][1]
-                    logical_form_template = logical_form
-                    logical_form_template = logical_form_template.replace("|test|", test_name)
-                    logical_form_template = logical_form_template.replace("|time|", time_val)
-                    logical_form_template = logical_form_template.replace("|value|", test_value[test_name])
-                    answers = []
-
-                    question_paraphrases = []
-                    for question in question_list:
-                        orginal = question
-                        question = question.replace("|test|", test_name)
-                        question = question.replace("|time|", time_val)
-                        question = question.replace("|value|", test_value[test_name])
-                        if (question, orginal) not in question_paraphrases:
-                            question_paraphrases.append((question, orginal))
-                        non_uniq.append(question)
-
-                    for (on_date_disease,note_offset) in zip(Disease_time_progression,offset_notes):
-                        Diseases = key
-                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                        time = []
-                        for annotations in inidcators[test]:
-                            time = inidcators[test][annotations][0]
-
-                        if "before DCT" in time or "during DCT" in time:
-                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                            answers.append(annotations)
-                            #print(annotations)
-
-                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-                        # for value in test_annotations:
-                        #    test_annotations[]
-        elif answertype == "results":
-
-            for key in disease_test:
-                Diseases = key
-                test_mentions = disease_test[Diseases]
-                for test in test_mentions:  ## on "high bp...
-
-                    test_name = dictionary[test][1]
-                    logical_form_template = logical_form
-                    logical_form_template = logical_form_template.replace("|test|", test_name)
-                    answers = []
-
-                    question_paraphrases = []
-                    for question in question_list:
-                        orginal = question
-                        question = question.replace("|test|", test_name)
-                        if (question, orginal) not in question_paraphrases:
-                            question_paraphrases.append((question, orginal))
-                        non_uniq.append(question)
-                    for (on_date_disease,note_offset) in zip(Disease_time_progression,offset_notes):
-                        Diseases = key
-                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                        time = []
-                        for annotations in inidcators[test]:
-                            time = inidcators[test][annotations][0]
-
-                        if "before DCT" in time or "during DCT" in time:
-                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                            answers.append(annotations)
-
-                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-        elif answertype == "test_problem":
-
-            for key in disease_test:
-                Diseases = key
-                test_mentions = disease_test[Diseases]
-                for test in test_mentions:  ## on "high bp...
-
-                    test_name = dictionary[test][1]
-                    logical_form_template = logical_form
-                    logical_form_template = logical_form_template.replace("|test|", test_name)
-                    logical_form_template = logical_form_template.replace("|problem|",Diseases)
-                    answers = []
-
-                    question_paraphrases = []
-                    for question in question_list:
-                        orginal = question
-                        question = question.replace("|test|", test_name)
-                        question = question.replace("|problem|", Diseases)
-                        if (question, orginal) not in question_paraphrases:
-                            question_paraphrases.append((question, orginal))
-                        non_uniq.append(question)
-                    for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
-                        Diseases = key
-                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                        time = []
-                        for annotations in inidcators[test]:
-                            time = inidcators[test][annotations][0]
-
-                        if "before DCT" in time or "during DCT" in time:
-                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                            answers.append(annotations)
-
-                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-
-        elif answertype == "problem_result":
-
-            for key in disease_test:
-                Diseases = key
-                test_mentions = disease_test[Diseases]
-                for test in test_mentions:  ## on "high bp...
-
-                    test_name = dictionary[test][1]
-                    logical_form_template = logical_form
-                    logical_form_template = logical_form_template.replace("|problem|",Diseases)
-                    answers = []
-
-                    question_paraphrases = []
-                    for question in question_list:
-                        orginal = question
-                        question = question.replace("|problem|", Diseases)
-                        if (question, orginal) not in question_paraphrases:
-                            question_paraphrases.append((question, orginal))
-                        non_uniq.append(question)
-                    for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
-                        Diseases = key
-                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                        time = []
-                        for annotations in inidcators[test]:
-                            time = inidcators[test][annotations][0]
-
-                        if "before DCT" in time or "during DCT" in time:
-                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                            answers.append(annotations)
-
-                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-
-        elif answertype == "test_date":
-            for key in disease_test:
-                Diseases = key
-                test_mentions = disease_test[Diseases]
-                for test in test_mentions:  ## on "high bp...
-
-                    test_name = dictionary[test][1]
-                    logical_form_template = logical_form
-                    logical_form_template = logical_form_template.replace("|test|", test_name)
-                    answers = []
-
-                    question_paraphrases = []
-                    for question in question_list:
-                        orginal = question
-                        question = question.replace("|test|", test_name)
-                        if (question, orginal) not in question_paraphrases:
-                            question_paraphrases.append((question, orginal))
-                        non_uniq.append(question)
-                    for (on_date_disease,record_date,note_offset) in zip(Disease_time_progression,Record_dates,offset_notes):
-                        Diseases = key
-                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                        time = []
-                        for annotations in inidcators[test]:
-                            time = inidcators[test][annotations][0]
-
-                        if "during DCT" in time:
-                            record_date = record_date[0:-2] + (record_date[-2] + note_offset,record_date[-1]+note_offset)
-                            answers.append(record_date)
-                            #print(annotations)
-
-                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-        elif answertype == "results_all":
-            for key in disease_test:
-                Diseases = key
-                test_mentions = disease_test[Diseases]
-                for test in test_mentions:  ## on "high bp...
-
-                    test_name = dictionary[test][1]
-
-                    answers = []
-
-                    question_paraphrases = []
-                    for question in question_list:
-                        orginal = question
-                        if (question, orginal) not in question_paraphrases:
-                            question_paraphrases.append((question, orginal))
-                        non_uniq.append(question)
-                    for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
-                        Diseases = key
-                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                        time = []
-                        for annotations in inidcators[test]:
-                            time = inidcators[test][annotations][0]
-
-                        if "during DCT" in time:
-                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                            answers.append(annotations)
-                            #print(annotations)
-
-            QLA.append((question_paraphrases, logical_form, answers,non_uniq))
-        elif answertype == "test_date":
-            for key in disease_test:
-                Diseases = key
-                test_mentions = disease_test[Diseases]
-                for test in test_mentions:  ## on "high bp...
-
-                    test_name = dictionary[test][1]
-                    logical_form_template = logical_form
-                    logical_form_template = logical_form_template.replace("|test|", test_name)
-                    answers = []
-
-                    question_paraphrases = []
-                    for question in question_list:
-                        orginal = question
-                        question = question.replace("|test|", test_name)
-                        if (question, orginal) not in question_paraphrases:
-                            question_paraphrases.append((question, orginal))
-                        non_uniq.append(question)
-                    for (on_date_disease, record_date, note_offset) in zip(Disease_time_progression, Record_dates,
-                                                                           offset_notes):
-                        Diseases = key
-                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                        time = []
-                        for annotations in inidcators[test]:
-                            time = inidcators[test][annotations][0]
-
-                        if "during DCT" in time:
-                            record_date = record_date[0:-2] + (record_date[-2] + note_offset,record_date[-1]+note_offset)
-                            answers.append(record_date)
-                            #print(annotations)
-
-                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-
-        elif answertype == "disease_date":
-
-            for key in disease_test:
-                Diseases = key
-
-                logical_form_template = logical_form
-                logical_form_template = logical_form_template.replace("|problem|", key.lower())
-                answers = []
-
-                question_paraphrases = []
-                for question in question_list:
-                    orginal = question
-                    question = question.replace("|problem|", key.lower())
-                    if (question, orginal) not in question_paraphrases:
-                        question_paraphrases.append((question, orginal))
-                    non_uniq.append(question)
-                for (on_date_disease, record_date, note_offset) in zip(Disease_time_progression, Record_dates,offset_notes):
-                    Diseases = key
-                    inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                    time = []
-                    for annotations in inidcators["mention"]:
-                        time = inidcators["mention"][annotations][0]
-
-                    if "during DCT" in time and "before DCT" not in time and "after DCT" not in time :
-                        record_date = record_date[0:-2] + (record_date[-2] + note_offset,record_date[-1]+note_offset)
-                        answers.append(record_date)
-                        #print(annotations)
-
-                QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-
-        elif answertype == "indicators":
-            for key in disease_test:
-                Diseases = key
-
-                logical_form_template = logical_form
-                logical_form_template = logical_form_template.replace("|problem|", key.lower())
-                answers = []
-
-                question_paraphrases = []
-                for question in question_list:
-                    orginal = question
-                    question = question.replace("|problem|", key.lower())
-                    if (question, orginal) not in question_paraphrases:
-                        question_paraphrases.append((question, orginal))
-                    non_uniq.append(question)
-                for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
-                    Diseases = key
-                    inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                    time = []
-                    for annotations in inidcators["mention"]:
-                        time = inidcators["mention"][annotations][0]
-
-                    if len(time) != 0:
-                        annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                        answers.append(annotations)
-                        # print(annotations)
-
-                QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-        elif answertype == "symptom":
-            key = "CAD"
-            logical_form_template = logical_form
-            logical_form_template = logical_form_template.replace("|problem|", key)
-            answers = []
-
-            question_paraphrases = []
-            for question in question_list:
-                orginal = question
-                question = question.replace("|problem|", key)
-                if (question,orginal) not in question_paraphrases:
-                    question_paraphrases.append((question,orginal))
-                non_uniq.append(question)
-            for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
-                Diseases = key
-                inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                time = []
-                for annotations in inidcators["symptom"]:
-                    time = inidcators["symptom"][annotations][0]
-
-                if len(time) != 0:
-                    annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                    answers.append(annotations)
-                    # print(annotations)
-
-            QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
-        elif answertype == "medications_all":
-            for key in disease_test:
-                logical_form_template = logical_form
-
-                answers = []
-
-                for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
-                    Diseases = key
-                    inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
-                    time = []
-                    for med_type in self.types:
-                        try:
-                            out = inidcators[med_type]
-                        except:
-                            continue
-
-                        for annotations in out:
-                            time = inidcators[med_type][annotations][0]
-
-                            if len(time) != 0:
-                                annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
-                                answers.append(annotations)
-                                # print(annotations)
-            print(question_list[0])
-            QLA.append([[(question_list[0],question_list[0])], logical_form_template, answers,question_list])
-        else:
-            print(answertype)
-
-        return QLA
-
-    def MakeRiskQLA(self,PatientNote, question, answertype, logical_form, Disease_time_progression, Record_dates, Noteid, types_to_replace,offset_notes):
-        answer_out = []
-        question_list = question.strip().replace("|problem| or |problem|","|problem|").split("##")
-
-        ## Run this by default ###
-        logical_form_orginal = logical_form
-
-        QLA = self.MakeAnswers(answertype,types_to_replace,question_list,logical_form, Disease_time_progression, Record_dates,Noteid,offset_notes)
-        if len(QLA) == 0:
-            return []
-        for values in QLA: #question,orginal
-
-            if len(values[2]) == 0:
-                paraphrase_questions = values[0]
-                unique_tup = list(set(zip(paraphrase_questions, question_list)))
-                for qidx in range(len(unique_tup)):
-                #    q_id = self.question_id[unique_tup[qidx][1]]
-                #    l_id = self.logicalform_id[logical_form.strip()]
-                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_orginal])
-                #print(paraphrase_questions)
-                #for (question,orginal) in set(paraphrase_questions):
-                #    self.filewriter_forlform.writerow([question] + [logical_form] + [orginal] + [logical_form_orginal])
-            else:
-                answer_text = []
-                line_in_note = []
-                start_line = []
-                for answer in values[2]:
-                    #print(answer)
-                    (text, inline_text, start_inline_text, start) = answer
-                    if inline_text not in line_in_note:
-                        answer_text.append(text)
-                        line_in_note.append(inline_text)
-                        start_line.append(start_inline_text)
-
-                Note_val = "#".join(line_in_note)
-                self.filewriter.writerow(["##".join(list(zip(*values[0])[0]))] + [values[1]] + [",".join(answer_text)] + [Note_val] + [Noteid + "_RiskChallenge"])
-
-                question_id = 0
-                paraphrase_questions = values[0]
-
-
-                unique_tup = list(set(zip(paraphrase_questions, question_list)))
-                tuple_ids = []
-                for qidx in range(len(unique_tup)):
-                #    q_id = self.question_id[unique_tup[qidx][1]]
-                #    l_id = self.logicalform_id[logical_form.strip()]
-                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_orginal])
-                #    tuple_ids.append([q_id,unique_tup[qidx][0]])
-                #or (question,orginal) in set(paraphrase_questions):
-                 #   self.filewriter_forlform.writerow([question] + [logical_form] + [orginal] + [logical_form_orginal])
-
-                if set(list(zip(*values[0])[0])) not in self.unique_questions:
-
-                    self.unique_questions.append(set(list(zip(*values[0])[0])))
-                    question_id += 1
-                    ans_list = []
-                    answers = values[2]
-                    l_id = self.logicalform_id[logical_form.strip()]
-                    for idx in range(len(answers)):
-                        ## evidence per answer ##
-                        (text, inline_text, start_inline_text, start) = answers[idx]
-                        #print(text)
-                        val = {"answer_start": [start_inline_text, start], "text": text,
-                                         "evidence": inline_text,
-                                         "evidence_start":start_inline_text}
-                        print("idx \n")
-                        print(val["evidence"])
-                        print(PatientNote[int(val["evidence_start"]):int(val["evidence_start"])+len(val["evidence"])])
-                        if val not in ans_list:
-                            ans_list.append(val)  # evidence will have q_line_answer_line
-
-                    #print(ans_list,l_id,tuple_ids)
-                    answer_temp = {"answers": ans_list, "id": [values[0],logical_form_orginal], "question": list(list(zip(*values[0])[0])),
-                                   "orginal_template": ",".join(question_list)}
-
-                    answer_out.append(answer_temp)
-
-        return answer_out
-
-    def Make_Question_Answers_LogicalForms(self):
-        self.question_id = {}
-        self.logicalform_id = {}
-        self.logical_out = []
-
-        ########################################## Read unique ids ##############################################
-        csvreader = (csv.reader(open("/home/anusri/Desktop/codes_submission/dataset_indexing/questions_index.csv")))
-        for listi in csvreader:
-            self.question_id[listi[0]] = listi[1]
-
-        csvreader = (csv.reader(open("/home/anusri/Desktop/codes_submission/dataset_indexing/logical_forms_index.csv")))
-        for listi in csvreader:
-            self.logicalform_id[listi[0].strip()] = listi[1]
-
-
-
-        ### File to write Question-Answers ##
-        ofile = open("question-answers-final.csv", "w")
-        self.filewriter = csv.writer(ofile, delimiter="\t")
-        self.filewriter.writerow(
-            ["Question", "Logical Form", "Answer", "Answer line in note", "Note ID"])
-
-        ### File to write Question-Logical Forms ##
-
-        ofile = open("/home/anusri/Desktop/IBM/Answers-old/combine/ql_dataset/risk.csv", "w")
-        self.filewriter_forlform = csv.writer(ofile, delimiter="\t")
-        self.filewriter_forlform.writerow(["Question", "Logical Form"])
-
-        self.relations_out = {"paragraphs": [], "title": "risk-dataset"}
-
-        ### File to read templates ###
-        file = open("templates-all.csv")
-        filereader = list(csv.reader(file))
-
-        risk_lines = []
-        for line in filereader[1:]:
-            if line[0] != "risk":
-                continue
-            risk_lines.append(line)
-
-        total_questions = 0
-        for Noteid in self.RiskAnnotationsPerNote:
-            [PatientNotes, RecordDates, Disease_note] = self.RiskAnnotationsPerNote[Noteid]
-            #PatientNote = "\n".join(PatientNotes)
-            PatientNote = ""
-            for note in PatientNotes:
-                PatientNote += note + "\n"
-            offset_notes = [0]
-            #for note in PatientNotes[0:-1]:
-            #    new_offset = len(note)+1+offset_notes[-1]
-            #    offset_notes.append(new_offset)
-            #print(offset_notes)
-            out_patient = {"note_id": Noteid, "context": PatientNote.split("\n"), "qas": []}
-            self.unique_questions = []
-
-            for line in risk_lines:
-                question = line[2].strip()
-                answertype = line[4]
-                #answertype = [type.strip() for type in answertype]
-                logical_form = line[3].strip()
-                question = question.replace("\t", "")
-                logical_form = logical_form.replace("\t", "")
-
-                if question.strip() == "":
-                    continue
-
-                types_to_replace = self.checking_for_errors(question, logical_form)
-                if len(types_to_replace) != 0:
-                    types_to_replace = list(types_to_replace[0])
-                else:
-                    types_to_replace = []
-
-                answer_out = self.MakeRiskQLA(PatientNote, question, answertype, logical_form, Disease_note, RecordDates, Noteid, types_to_replace,offset_notes)
-
-                if len(answer_out) != 0:
-                    out_patient["qas"].extend(answer_out)
-            total_questions += len(self.unique_questions)
-            self.relations_out["paragraphs"].append(out_patient)
-        json_out = "risk-QA.json"
-        with open(json_out, 'w') as outfile:
-            json.dump(self.relations_out, outfile, ensure_ascii=False)
-
-        json_out = "risk-QL.json"
-        with open(json_out, 'w') as outfile:
-            json.dump(self.logical_out, outfile,
-                      ensure_ascii=False)  ## storage format ## question logical_form question_id logicalfrom_id source
-
-    def WriteTimeData(self):
-        OutputFile = "TimeSeriesRiskData.csv"
-
-        ofile = open(OutputFile,"w")
-        writer = csv.writer(ofile)
-
-
-        for patient_id in self.Patients:
-
-            for var in ["glucose", "A1C", "mention"]+self.Medications:
-                timeline = [patient_id,var]
-                heading = ["patient_id", "variable"]
-                #print(len(self.Patients[patient_id]))
-                for idx in range(len(self.Patients[patient_id])):
-                    #looping over the dates
-                    #(before,current,after) the date tuple
-
-                    date = self.Patients[patient_id][idx][1]
-                    #print(date)
-
-                    heading.extend(["before " + date, date, "after " + date])
-                    #print(heading)
-                    #print(date)
-                    values = [[],[],[]]
-
-
-                    event_dictionary = self.Patients[patient_id][idx][2]
-
-                    for keys in event_dictionary["Diabetes"][var]:
-                        #print(keys)
-                        #print(event_dictionary["Diabetes"][var])
-                        if "continuing" in event_dictionary["Diabetes"][var][keys]:
-                            #values[0] += " # "+keys[0]
-                            #values[1] += " # "+keys[0]
-                            #values[2] += " # "+keys[0]
-                            flag = 0
-                            out = zip(*values[0])
-                            if len(out) == 0:
-                                out = []
-                            for word in out[0]:
-                                if keys[0] in word:
-                                    flag = 1
-                                    break
-                            if flag == 0:
-                                values[0].append((keys[0],keys[1]))
-                            else:
-                                if keys[1] not in out[1]:
-                                    values[0].append((keys[0], keys[1]))
-
-                            flag = 0
-                            out = zip(*values[1])
-                            if len(out) == 0:
-                                out = ["",""]
-                            for word in out[0]:
-                                if keys[0] in word:
-                                    flag = 1
-                                    break
-                            if flag == 0:
-                                values[1].append((keys[0], keys[1]))
-                            else:
-                                if keys[1] not in out[1]:
-                                    values[1].append((keys[0], keys[1]))
-
-                            flag = 0
-                            out = zip(*values[2])
-                            if len(out) == 0:
-                                out = ["",""]
-                            for word in out[0]:
-                                if keys[0] in word:
-                                    flag = 1
-                                    break
-                            if flag == 0:
-                                values[2].append((keys[0], keys[1]))
-                            else:
-                                if keys[1] not in out[1]:
-                                    values[2].append((keys[0], keys[1]))
-                        else:
-                            if "after DCT" in event_dictionary["Diabetes"][var][keys]:
-                                #values[2] += " # "+keys[0]
-                                flag = 0
-                                out = zip(*values[2])
-                                if len(out) == 0:
-                                    out = ["",""]
-                                for word in out[0]:
-                                    if keys[0] in word:
-                                        flag = 1
-                                        break
-                                if flag == 0:
-                                    values[2].append((keys[0], keys[1]))
-                                else:
-                                    if keys[1] not in out[1]:
-                                        values[2].append((keys[0], keys[1]))
-
-                            if "before DCT" in event_dictionary["Diabetes"][var][keys]:
-                                #values[0] += " # "+keys[0]
-                                flag = 0
-                                out = zip(*values[0])
-                                if len(out) == 0:
-                                    out = ["",""]
-                                for word in out[0]:
-                                    if keys[0] in word:
-                                        flag = 1
-                                        break
-                                if flag == 0:
-                                    values[0].append((keys[0], keys[1]))
-                                else:
-                                    if keys[1] not in out[1]:
-                                        values[0].append((keys[0], keys[1]))
-                            if "during DCT" in event_dictionary["Diabetes"][var][keys]:
-                                #values[1] += " # "+keys[0]
-
-                                flag = 0
-                                out = zip(*values[1])
-                                if len(out) == 0:
-                                    out = ["",""]
-                                for word in out[0]:
-                                    if keys[0] in word:
-                                        flag = 1
-                                        break
-                                if flag == 0:
-                                    values[1].append((keys[0], keys[1]))
-                                else:
-                                    if keys[1] not in out[1]:
-                                        values[1].append((keys[0], keys[1]))
-
-
-                        if "not mentioned" in event_dictionary["Diabetes"][var][keys]:
-                            print("not mentioned occurence")
-
-                    timeline.extend(values)
-
-                if var == "glucose":
-                    writer.writerow(heading)
-
-                writer.writerow(timeline)
-
-            writer.writerow([""])
-    ### Read the Risk Files ###
     def ReadFile(self):
 
-        file_path = ["/home/anusri/Desktop/IBM/i2b2/heart-disease-risk/training-RiskFactors-Complete-Set1/"]
+        file_path = RiskFilePath
         TempFile = "temp_risk.txt"
 
         self.Patients = {}
-        self.RiskAnnotationsPerNote = {} ## same but just compressed
+        self.RiskAnnotationsPerNote = {}
         for paths in file_path:
             files = listdir(paths)
             files.sort()
 
             for file in files:
-                #print("Analyzing File:"+file)
+
                 [patient_id,record] = file.split("-")
                 id = record.split(".")[0]
 
@@ -959,7 +116,7 @@ class RiskFileAnalysis():
                 self.RiskAnnotationsPerNote[patient_id][2].append(out)
                 self.RiskAnnotationsPerNote[patient_id][0].append(tuple[0])
                 self.RiskAnnotationsPerNote[patient_id][1].append(tuple[1])
-                #print(tuple[1])
+
     def ReadHYPERTENSION(self, patient_id):
 
         disease = "HYPERTENSION"
@@ -2112,7 +1269,6 @@ class RiskFileAnalysis():
                     print(indicator)
                     continue
         self.ReadMedication(patient_id, indices, Clinical_Notes, Record_Date, Dictionary, Medications, disease)
-
     def ReadMedication(self,patient_id,indices,Clinical_Notes,Record_Date,Dictionary,Medications,disease):
 
 
@@ -2214,6 +1370,843 @@ class RiskFileAnalysis():
 
         self.Patients[patient_id].append((Clinical_Notes, Record_Date, Dictionary))
 
+    ############################## Main Functions ###########################################################
 
+    def ReadTemplates(self):
+        self.logical_out = []
+
+        ### File to write Question-Answers ##
+
+        ofile = open(qa_output, "w")
+        self.filewriter = csv.writer(ofile, delimiter="\t")
+        self.filewriter.writerow(
+            ["Question", "Logical Form", "Answer", "Answer line in note", "Note ID"])
+
+        ### File to write Question-Logical Forms ##
+
+        ofile = open(ql_output, "w")
+        self.filewriter_forlform = csv.writer(ofile, delimiter="\t")
+        self.filewriter_forlform.writerow(["Question", "Logical Form"])
+
+        self.relations_out = {"paragraphs": [], "title": "risk-dataset"}
+
+        ### File to read templates ###
+
+        file = open(template_file_path)
+        filereader = list(csv.reader(file))
+
+        ## read only templates relevant to heart disease risk challenge ##
+
+        risk_lines = []
+        for line in filereader[1:]:
+            if line[0] != "risk":
+                continue
+            risk_lines.append(line)
+
+        total_questions = 0
+
+        for Noteid in self.RiskAnnotationsPerNote:
+            [PatientNotes, RecordDates, Disease_note] = self.RiskAnnotationsPerNote[Noteid]
+            # PatientNote = "\n".join(PatientNotes)
+            PatientNote = ""
+            for note in PatientNotes:
+                PatientNote += note + "\n"
+            offset_notes = [0]
+            #for note in PatientNotes[0:-1]:
+            #    new_offset = len(note)+1+offset_notes[-1]
+            #    offset_notes.append(new_offset)
+            #print(offset_notes)
+
+            out_patient = {"note_id": Noteid, "context": PatientNote.split("\n"), "qas": []}
+            self.unique_questions = []
+
+            for line in risk_lines:
+                question = line[2].strip()
+                answertype = line[4]
+                # answertype = [type.strip() for type in answertype]
+                logical_form = line[3].strip()
+                question = question.replace("\t", "")
+                logical_form = logical_form.replace("\t", "")
+                question = question.replace("|medication| or |medication|", "|medication|")  ## added ##
+                question = question.replace("|problem| or |problem|", "|problem|")  ## added ##
+                question = question.replace("|test| or |test|", "|test|")  ## added ##
+                question = question.replace("|test| |test| |test|", "|test|")  ## added ##
+
+                if question.strip() == "":
+                    continue
+
+                types_to_replace = self.checking_for_errors(question, logical_form)
+
+                if len(types_to_replace) != 0:
+                    types_to_replace = list(types_to_replace[0])
+                else:
+                    types_to_replace = []
+
+                answer_out = self.MakeRiskQLA(PatientNote, question, answertype, logical_form, Disease_note, RecordDates, Noteid, types_to_replace, offset_notes)
+
+                if len(answer_out) != 0:
+                    out_patient["qas"].extend(answer_out)
+
+            total_questions += len(self.unique_questions)
+            self.relations_out["paragraphs"].append(out_patient)
+
+        with open(risk_qa_output_json, 'w') as outfile:
+            json.dump(self.relations_out, outfile, ensure_ascii=False)
+
+    def MakeRiskQLA(self, PatientNote, question, answertype, logical_form, Disease_time_progression, Record_dates, Noteid, types_to_replace, offset_notes):
+        answer_out = []
+        question_list = question.strip().split("##")
+        logical_form_orginal = logical_form
+
+        QLA = self.MakeAnswers(answertype, types_to_replace, question_list, logical_form, Disease_time_progression, Record_dates, Noteid, offset_notes)
+
+        if len(QLA) == 0:
+            return []
+
+        for values in QLA:  # question,orginal
+
+            if len(values[2]) == 0:
+
+                paraphrase_questions = values[0]
+                unique_tup = list(set(zip(paraphrase_questions, question_list)))
+                for qidx in range(len(unique_tup)):
+                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_orginal])
+            else:
+
+                '''
+                answer_text = []
+                line_in_note = []
+                start_line = []
+                for answer in values[2]:
+                    (text, inline_text, start_inline_text, start) = answer
+                    
+                    if inline_text not in line_in_note:
+                        answer_text.append(text)
+                        line_in_note.append(inline_text)
+                        start_line.append(start_inline_text)
+
+                
+                Note_val = "#".join(line_in_note)
+                self.filewriter.writerow(
+                    ["##".join(list(zip(*values[0])[0]))] + [values[1]] + [",".join(answer_text)] + [Note_val] + [
+                        Noteid + "_RiskChallenge"])
+                '''
+
+                paraphrase_questions = values[0]
+                unique_tup = list(set(zip(paraphrase_questions, question_list)))
+                for qidx in range(len(unique_tup)):
+                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_orginal])
+
+                if set(list(zip(*values[0])[0])) not in self.unique_questions:
+
+                    self.unique_questions.append(set(list(zip(*values[0])[0])))
+                    ans_list = []
+                    answers = values[2]
+
+                    for idx in range(len(answers)):
+                        (text, inline_text, start_inline_text, start) = answers[idx]
+
+                        val = {"answer_start": [start_inline_text, start], "text": text, "evidence": inline_text, "evidence_start": start_inline_text}
+                        #print("idx \n")
+                        #print(val["evidence"])
+                        #print(PatientNote[int(val["evidence_start"]):int(val["evidence_start"]) + len(val["evidence"])])
+                        if val not in ans_list:
+                            ans_list.append(val)  # evidence will have q_line_answer_line
+
+                    answer_temp = {"answers": ans_list, "id": [values[0], logical_form_orginal],"question": list(list(zip(*values[0])[0])),"orginal_template": ",".join(question_list)}
+                    answer_out.append(answer_temp)
+
+        return answer_out
+
+    ######################## Main Utility Functions ########################################################
+
+    def MakeAnswers(self,answertype,types_to_replace,question_list,logical_form, Disease_time_progression, Record_dates,Noteid,offset_notes):
+        QLA = []
+        paraphrase_questions = []
+        non_uniq = []
+        logical_form_orginal = logical_form
+        if answertype == "none":
+            annotations = self.InputMapping(types_to_replace,question_list,logical_form )
+
+            ################# Generate only Question Logical Forms ##################################
+            for value in annotations:
+
+                logical_form_template = logical_form
+                new_question_list = []
+                for question in question_list:
+                    done = []
+                    idx = 0
+                    for types in list(types_to_replace):
+                        # temp = qwords
+                        index = question.find("|" + types + "|")
+                        if index == -1 and types not in done:
+                            if types == "medication":
+                                question = question.replace("|treatment|","|medication|")
+                                index = question.find("|" + "medication" + "|")
+                                if index == -1 and types not in done:
+                                    print(question, "|" + types + "|", done)
+
+                            else:
+                                print(question, "|" + types + "|", done)
+                        question = question.replace("|" + types + "|", value[idx])
+                        done.append(types)
+                        idx += 1
+                    paraphrase_questions.append(question)
+                    if question not in new_question_list:
+                        new_question_list.append(question)
+
+
+                idx = 0
+                done = []
+                for types in list(types_to_replace):
+                    index = logical_form_template.find("|" + types + "|")
+                    if index == -1 and types not in done:
+                        print(logical_form_template, "|" + types + "|", done, types)
+                    done.append(types)
+                    logical_form_template = logical_form_template.replace("|" + types + "|", value[idx])
+                    idx += 1
+
+                unique_tup = list(set(zip(paraphrase_questions, question_list)))
+
+                for qidx in range(len(unique_tup)):
+                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form_template] + [unique_tup[qidx][1]] + [logical_form_orginal])
+            return QLA
+
+        elif answertype == "result_date":
+            for (on_date_disease,record_date,note_offset) in zip(Disease_time_progression,Record_dates,offset_notes):
+                for Diseases in on_date_disease: ## Diseases has a list of Diseases keys
+                     inidcators = on_date_disease[Diseases] ## Get all corresponding indicators for that problem
+                     #print(inidcators)
+                     test_mentions = disease_test[Diseases]
+                     for test in test_mentions: ## on "high bp...
+                         #print(test)
+                         time = []
+                         for annotations in inidcators[test]:
+                             time = inidcators[test][annotations][0]
+
+                         test_name = dictionary[test][1]
+                         disease_name = dictionary[test][0].lower()
+
+                         logical_form_template = logical_form
+                         logical_form_template = logical_form_template.replace("|test|", test_name)
+                         logical_form_template = logical_form_template.replace("|date|", record_date[0])
+
+                         answers = []
+
+                         question_paraphrases = []
+                         for question in question_list:
+                            orginal = question
+                            question = question.replace("|test|", test_name)
+                            question = question.replace("|date|", record_date[0])
+                            if (question, orginal) not in question_paraphrases:
+                                question_paraphrases.append((question, orginal))
+                            non_uniq.append(question)
+                         if "during DCT" in time:
+                            annotations = annotations[0:-2] + (annotations[-2]+note_offset, annotations[-1]+note_offset)
+                            answers.append(annotations)
+                            #print(annotations)
+
+                         QLA.append((question_paraphrases,logical_form_template,answers,non_uniq))
+                            #for value in test_annotations:
+                             #    test_annotations[]
+        elif answertype == "result_value_time":
+
+            year = []
+            month = []
+            day = []
+            for date in Record_dates:
+                try:
+                    values = date[0].split("-")
+                    if int(values[0]) not in year:
+                        year.append(int(values[0]))
+                    if int(values[1]) not in month:
+                        month.append(int(values[1]))
+                    if int(values[2]) not in day:
+                        day.append(int(values[2]))
+                except:
+                    values = date[0].split("/")
+                    if int(values[2]) not in year:
+                        year.append(int(values[2]))
+                    if int(values[1]) not in month:
+                        month.append(int(values[1]))
+                    if int(values[0]) not in day:
+                        day.append(int(values[0]))
+
+            if len(year) > 1:
+                time_val = str(max(year)-min(year)) + " years"
+            elif len(month) > 1:
+                time_val = str(max(month)-min(month)) + " months"
+            else:
+                time_val = str(max(day)-min(day)) + " days"
+            for key in disease_test:
+                Diseases = key
+                test_mentions = disease_test[Diseases]
+                for test in test_mentions:  ## on "high bp...
+
+                    test_name = dictionary[test][1]
+                    logical_form_template = logical_form
+                    logical_form_template = logical_form_template.replace("|test|", test_name)
+                    logical_form_template = logical_form_template.replace("|time|", time_val)
+                    logical_form_template = logical_form_template.replace("|value|", test_value[test_name])
+                    answers = []
+
+                    question_paraphrases = []
+                    for question in question_list:
+                        orginal = question
+                        question = question.replace("|test|", test_name)
+                        question = question.replace("|time|", time_val)
+                        question = question.replace("|value|", test_value[test_name])
+                        if (question, orginal) not in question_paraphrases:
+                            question_paraphrases.append((question, orginal))
+                        non_uniq.append(question)
+
+                    for (on_date_disease,note_offset) in zip(Disease_time_progression,offset_notes):
+                        Diseases = key
+                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                        time = []
+                        for annotations in inidcators[test]:
+                            time = inidcators[test][annotations][0]
+
+                        if "before DCT" in time or "during DCT" in time:
+                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                            answers.append(annotations)
+                            #print(annotations)
+
+                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+                        # for value in test_annotations:
+                        #    test_annotations[]
+        elif answertype == "results":
+
+            for key in disease_test:
+                Diseases = key
+                test_mentions = disease_test[Diseases]
+                for test in test_mentions:  ## on "high bp...
+
+                    test_name = dictionary[test][1]
+                    logical_form_template = logical_form
+                    logical_form_template = logical_form_template.replace("|test|", test_name)
+                    answers = []
+
+                    question_paraphrases = []
+                    for question in question_list:
+                        orginal = question
+                        question = question.replace("|test|", test_name)
+                        if (question, orginal) not in question_paraphrases:
+                            question_paraphrases.append((question, orginal))
+                        non_uniq.append(question)
+                    for (on_date_disease,note_offset) in zip(Disease_time_progression,offset_notes):
+                        Diseases = key
+                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                        time = []
+                        for annotations in inidcators[test]:
+                            time = inidcators[test][annotations][0]
+
+                        if "before DCT" in time or "during DCT" in time:
+                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                            answers.append(annotations)
+
+                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+        elif answertype == "test_problem":
+
+            for key in disease_test:
+                Diseases = key
+                test_mentions = disease_test[Diseases]
+                for test in test_mentions:  ## on "high bp...
+
+                    test_name = dictionary[test][1]
+                    logical_form_template = logical_form
+                    logical_form_template = logical_form_template.replace("|test|", test_name)
+                    logical_form_template = logical_form_template.replace("|problem|",Diseases)
+                    answers = []
+
+                    question_paraphrases = []
+                    for question in question_list:
+                        orginal = question
+                        question = question.replace("|test|", test_name)
+                        question = question.replace("|problem|", Diseases)
+                        if (question, orginal) not in question_paraphrases:
+                            question_paraphrases.append((question, orginal))
+                        non_uniq.append(question)
+                    for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
+                        Diseases = key
+                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                        time = []
+                        for annotations in inidcators[test]:
+                            time = inidcators[test][annotations][0]
+
+                        if "before DCT" in time or "during DCT" in time:
+                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                            answers.append(annotations)
+
+                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+
+        elif answertype == "problem_result":
+
+            for key in disease_test:
+                Diseases = key
+                test_mentions = disease_test[Diseases]
+                for test in test_mentions:  ## on "high bp...
+
+                    test_name = dictionary[test][1]
+                    logical_form_template = logical_form
+                    logical_form_template = logical_form_template.replace("|problem|",Diseases)
+                    answers = []
+
+                    question_paraphrases = []
+                    for question in question_list:
+                        orginal = question
+                        question = question.replace("|problem|", Diseases)
+                        if (question, orginal) not in question_paraphrases:
+                            question_paraphrases.append((question, orginal))
+                        non_uniq.append(question)
+                    for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
+                        Diseases = key
+                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                        time = []
+                        for annotations in inidcators[test]:
+                            time = inidcators[test][annotations][0]
+
+                        if "before DCT" in time or "during DCT" in time:
+                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                            answers.append(annotations)
+
+                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+
+        elif answertype == "test_date":
+            for key in disease_test:
+                Diseases = key
+                test_mentions = disease_test[Diseases]
+                for test in test_mentions:  ## on "high bp...
+
+                    test_name = dictionary[test][1]
+                    logical_form_template = logical_form
+                    logical_form_template = logical_form_template.replace("|test|", test_name)
+                    answers = []
+
+                    question_paraphrases = []
+                    for question in question_list:
+                        orginal = question
+                        question = question.replace("|test|", test_name)
+                        if (question, orginal) not in question_paraphrases:
+                            question_paraphrases.append((question, orginal))
+                        non_uniq.append(question)
+                    for (on_date_disease,record_date,note_offset) in zip(Disease_time_progression,Record_dates,offset_notes):
+                        Diseases = key
+                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                        time = []
+                        for annotations in inidcators[test]:
+                            time = inidcators[test][annotations][0]
+
+                        if "during DCT" in time:
+                            record_date = record_date[0:-2] + (record_date[-2] + note_offset,record_date[-1]+note_offset)
+                            answers.append(record_date)
+                            #print(annotations)
+
+                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+        elif answertype == "results_all":
+            for key in disease_test:
+                Diseases = key
+                test_mentions = disease_test[Diseases]
+                for test in test_mentions:  ## on "high bp...
+
+                    test_name = dictionary[test][1]
+
+                    answers = []
+
+                    question_paraphrases = []
+                    for question in question_list:
+                        orginal = question
+                        if (question, orginal) not in question_paraphrases:
+                            question_paraphrases.append((question, orginal))
+                        non_uniq.append(question)
+                    for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
+                        Diseases = key
+                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                        time = []
+                        for annotations in inidcators[test]:
+                            time = inidcators[test][annotations][0]
+
+                        if "during DCT" in time:
+                            annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                            answers.append(annotations)
+                            #print(annotations)
+
+            QLA.append((question_paraphrases, logical_form, answers,non_uniq))
+        elif answertype == "test_date":
+            for key in disease_test:
+                Diseases = key
+                test_mentions = disease_test[Diseases]
+                for test in test_mentions:  ## on "high bp...
+
+                    test_name = dictionary[test][1]
+                    logical_form_template = logical_form
+                    logical_form_template = logical_form_template.replace("|test|", test_name)
+                    answers = []
+
+                    question_paraphrases = []
+                    for question in question_list:
+                        orginal = question
+                        question = question.replace("|test|", test_name)
+                        if (question, orginal) not in question_paraphrases:
+                            question_paraphrases.append((question, orginal))
+                        non_uniq.append(question)
+                    for (on_date_disease, record_date, note_offset) in zip(Disease_time_progression, Record_dates,
+                                                                           offset_notes):
+                        Diseases = key
+                        inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                        time = []
+                        for annotations in inidcators[test]:
+                            time = inidcators[test][annotations][0]
+
+                        if "during DCT" in time:
+                            record_date = record_date[0:-2] + (record_date[-2] + note_offset,record_date[-1]+note_offset)
+                            answers.append(record_date)
+                            #print(annotations)
+
+                    QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+
+        elif answertype == "disease_date":
+
+            for key in disease_test:
+                Diseases = key
+
+                logical_form_template = logical_form
+                logical_form_template = logical_form_template.replace("|problem|", key.lower())
+                answers = []
+
+                question_paraphrases = []
+                for question in question_list:
+                    orginal = question
+                    question = question.replace("|problem|", key.lower())
+                    if (question, orginal) not in question_paraphrases:
+                        question_paraphrases.append((question, orginal))
+                    non_uniq.append(question)
+                for (on_date_disease, record_date, note_offset) in zip(Disease_time_progression, Record_dates,offset_notes):
+                    Diseases = key
+                    inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                    time = []
+                    for annotations in inidcators["mention"]:
+                        time = inidcators["mention"][annotations][0]
+
+                    if "during DCT" in time and "before DCT" not in time and "after DCT" not in time :
+                        record_date = record_date[0:-2] + (record_date[-2] + note_offset,record_date[-1]+note_offset)
+                        answers.append(record_date)
+                        #print(annotations)
+
+                QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+
+        elif answertype == "indicators":
+            for key in disease_test:
+                Diseases = key
+
+                logical_form_template = logical_form
+                logical_form_template = logical_form_template.replace("|problem|", key.lower())
+                answers = []
+
+                question_paraphrases = []
+                for question in question_list:
+                    orginal = question
+                    question = question.replace("|problem|", key.lower())
+                    if (question, orginal) not in question_paraphrases:
+                        question_paraphrases.append((question, orginal))
+                    non_uniq.append(question)
+                for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
+                    Diseases = key
+                    inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                    time = []
+                    for annotations in inidcators["mention"]:
+                        time = inidcators["mention"][annotations][0]
+
+                    if len(time) != 0:
+                        annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                        answers.append(annotations)
+                QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+
+        elif answertype == "symptom":
+            key = "CAD"
+            logical_form_template = logical_form
+            logical_form_template = logical_form_template.replace("|problem|", key)
+            answers = []
+
+            question_paraphrases = []
+            for question in question_list:
+                orginal = question
+                question = question.replace("|problem|", key)
+                if (question,orginal) not in question_paraphrases:
+                    question_paraphrases.append((question,orginal))
+                non_uniq.append(question)
+            for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
+                Diseases = key
+                inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                time = []
+                for annotations in inidcators["symptom"]:
+                    time = inidcators["symptom"][annotations][0]
+
+                if len(time) != 0:
+                    annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                    answers.append(annotations)
+                    # print(annotations)
+
+            QLA.append((question_paraphrases, logical_form_template, answers,non_uniq))
+        elif answertype == "medications_all":
+            for key in disease_test:
+                logical_form_template = logical_form
+
+                answers = []
+
+                for (on_date_disease, note_offset) in zip(Disease_time_progression, offset_notes):
+                    Diseases = key
+                    inidcators = on_date_disease[Diseases]  ## Get all corresponding indicators for that problem
+                    time = []
+                    for med_type in self.types:
+                        try:
+                            out = inidcators[med_type]
+                        except:
+                            continue
+
+                        for annotations in out:
+                            time = inidcators[med_type][annotations][0]
+
+                            if len(time) != 0:
+                                annotations = annotations[0:-2] + (annotations[-2] + note_offset, annotations[-1] + note_offset)
+                                answers.append(annotations)
+                                # print(annotations)
+            print(question_list[0])
+            QLA.append([[(question_list[0],question_list[0])], logical_form_template, answers,question_list])
+        else:
+            print(answertype)
+
+        return QLA
+
+    def InputMapping(self, types_to_replace, logicalform, question_list):
+        annotations = []
+        if types_to_replace == ["test"]:
+            annotations = test_annotations
+            return annotations
+        elif types_to_replace == ["test", "date"]:
+            annotations = []
+            for test in test_annotations:
+                date = str(2000 + random.randint(0, 100)) + "-" + str(random.randint(1, 12)) + "-" + str(
+                    random.randint(1, 28))
+                annotations.append([test[0], date])
+        elif types_to_replace == ["test", "time"]:
+            annotations = []
+            for test in test_annotations:
+                time = random.choice(["years ", "weeks "]) + str(random.randint(2, 5))
+                annotations.append([test[0], time])
+        elif types_to_replace == ["test", "time", "value"]:
+            annotations = []
+            for test in test_annotations:
+                time = random.choice(["years ", "weeks "]) + str(random.randint(2, 5))
+                annotations.append([test[0], time, test_value[test[0]]])
+        elif types_to_replace == ["medication"] or types_to_replace == ["treatment"]:
+            annotations = [[meds] for meds in self.list_medications]
+        elif types_to_replace == ["problem"]:
+            annotations = [[prob] for prob in problem_annotations]
+        elif types_to_replace == ["test", "problem"]:
+            annotations = []
+            for problem in disease_test:
+                for test in disease_test[problem]:
+                    annotations.append([dictionary[test][1], problem])
+        elif types_to_replace == ["time"]:
+            time = random.choice(["years ", "weeks "]) + str(random.randint(2, 5))
+            annotations.append([time])
+        elif types_to_replace == ["none"]:
+            pass
+        else:
+            print(types_to_replace)
+
+        return annotations
+
+    ###################################### Supporting Utility Functions #######################################
+
+    def checking_for_errors(self, question_list, logical_form_template):
+        question_list = question_list.split("##")
+        qwords_list = []
+        dup_rwords_list = []
+        unique_templates = []
+
+        # logical_form_template = logical_form_template.replace("|treatment|", "|medication|").strip()
+
+        for question in question_list:
+            if question.strip() == "":
+                continue
+            # question = question.replace("|medication| or |medication|", "|medication|")
+            # question = question.replace("|treatment|", "|medication|").strip()
+            # logical_form_template.replace()
+            if question not in unique_templates:
+                unique_templates.append(question)
+            else:
+                continue
+
+            qtemplate = question
+            qwords = question.split("|")
+            dup_rwords = qwords[1:len(qwords):2]
+
+            qwords_list.append(qwords)
+
+            if len(dup_rwords_list) == 0:
+                dup_rwords_list = [set(dup_rwords)]
+            else:
+                if set(dup_rwords) not in dup_rwords_list:
+
+                    question = question.replace("|treatment|", "|medication|").strip()
+                    qwords = question.split("|")
+                    dup_rwords = qwords[1:len(qwords):2]
+                    if set(dup_rwords) not in dup_rwords_list:
+                        print("Error Out Of Context Question:")
+                        print(question, logical_form_template, question_list)
+                        return []
+
+        lwords = logical_form_template.split("|")
+        dup_lrwords = lwords[1:len(lwords):2]
+        if set(dup_lrwords) not in dup_rwords_list:
+            print("Error Out Of Context Question-Logical Form Pairs:")
+            print(question_list, logical_form_template)
+            return []
+
+        if len(dup_rwords_list) != 1:
+            print("Check Question_Logical Form Mapping")
+            print(dup_rwords_list, question_list)
+            print(logical_form_template)
+            return []
+
+        return dup_rwords_list
+
+    ## viz function ##
+    def WriteTimeData(self):
+        OutputFile = "TimeSeriesRiskData.csv"
+
+        ofile = open(OutputFile, "w")
+        writer = csv.writer(ofile)
+
+        for patient_id in self.Patients:
+
+            for var in ["glucose", "A1C", "mention"] + self.Medications:
+                timeline = [patient_id, var]
+                heading = ["patient_id", "variable"]
+                # print(len(self.Patients[patient_id]))
+                for idx in range(len(self.Patients[patient_id])):
+                    # looping over the dates
+                    # (before,current,after) the date tuple
+
+                    date = self.Patients[patient_id][idx][1]
+                    # print(date)
+
+                    heading.extend(["before " + date, date, "after " + date])
+                    # print(heading)
+                    # print(date)
+                    values = [[], [], []]
+
+                    event_dictionary = self.Patients[patient_id][idx][2]
+
+                    for keys in event_dictionary["Diabetes"][var]:
+                        # print(keys)
+                        # print(event_dictionary["Diabetes"][var])
+                        if "continuing" in event_dictionary["Diabetes"][var][keys]:
+                            # values[0] += " # "+keys[0]
+                            # values[1] += " # "+keys[0]
+                            # values[2] += " # "+keys[0]
+                            flag = 0
+                            out = zip(*values[0])
+                            if len(out) == 0:
+                                out = []
+                            for word in out[0]:
+                                if keys[0] in word:
+                                    flag = 1
+                                    break
+                            if flag == 0:
+                                values[0].append((keys[0], keys[1]))
+                            else:
+                                if keys[1] not in out[1]:
+                                    values[0].append((keys[0], keys[1]))
+
+                            flag = 0
+                            out = zip(*values[1])
+                            if len(out) == 0:
+                                out = ["", ""]
+                            for word in out[0]:
+                                if keys[0] in word:
+                                    flag = 1
+                                    break
+                            if flag == 0:
+                                values[1].append((keys[0], keys[1]))
+                            else:
+                                if keys[1] not in out[1]:
+                                    values[1].append((keys[0], keys[1]))
+
+                            flag = 0
+                            out = zip(*values[2])
+                            if len(out) == 0:
+                                out = ["", ""]
+                            for word in out[0]:
+                                if keys[0] in word:
+                                    flag = 1
+                                    break
+                            if flag == 0:
+                                values[2].append((keys[0], keys[1]))
+                            else:
+                                if keys[1] not in out[1]:
+                                    values[2].append((keys[0], keys[1]))
+                        else:
+                            if "after DCT" in event_dictionary["Diabetes"][var][keys]:
+                                # values[2] += " # "+keys[0]
+                                flag = 0
+                                out = zip(*values[2])
+                                if len(out) == 0:
+                                    out = ["", ""]
+                                for word in out[0]:
+                                    if keys[0] in word:
+                                        flag = 1
+                                        break
+                                if flag == 0:
+                                    values[2].append((keys[0], keys[1]))
+                                else:
+                                    if keys[1] not in out[1]:
+                                        values[2].append((keys[0], keys[1]))
+
+                            if "before DCT" in event_dictionary["Diabetes"][var][keys]:
+                                # values[0] += " # "+keys[0]
+                                flag = 0
+                                out = zip(*values[0])
+                                if len(out) == 0:
+                                    out = ["", ""]
+                                for word in out[0]:
+                                    if keys[0] in word:
+                                        flag = 1
+                                        break
+                                if flag == 0:
+                                    values[0].append((keys[0], keys[1]))
+                                else:
+                                    if keys[1] not in out[1]:
+                                        values[0].append((keys[0], keys[1]))
+                            if "during DCT" in event_dictionary["Diabetes"][var][keys]:
+                                # values[1] += " # "+keys[0]
+
+                                flag = 0
+                                out = zip(*values[1])
+                                if len(out) == 0:
+                                    out = ["", ""]
+                                for word in out[0]:
+                                    if keys[0] in word:
+                                        flag = 1
+                                        break
+                                if flag == 0:
+                                    values[1].append((keys[0], keys[1]))
+                                else:
+                                    if keys[1] not in out[1]:
+                                        values[1].append((keys[0], keys[1]))
+
+                        if "not mentioned" in event_dictionary["Diabetes"][var][keys]:
+                            print("not mentioned occurence")
+
+                    timeline.extend(values)
+
+                if var == "glucose":
+                    writer.writerow(heading)
+
+                writer.writerow(timeline)
+
+            writer.writerow([""])
 
 RiskFileAnalysis()
