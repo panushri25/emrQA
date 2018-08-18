@@ -26,13 +26,13 @@ Some statistics of the generated data:
 
 | Datasets | QA pairs | QL pairs | #Clinical Notes | 
 | :------: | :------: | :------: | :----: | 
-| i2b2 relations | 141,783 | 1,061,710 | 426 |
-| i2b2 assertions |  |  |  |
-| i2b2 medications | 223,829 | 165,471 | 262 |
+| i2b2 relations (concepts, relations)| 141,243 | 245,486 | 425 |
+| i2b2 relations (assertions) | 1,268,029 | 816,224  | 425  |
+| i2b2 medications | 255,908 | 198,739 | 261 |
 | i2b2 heart disease risk | 53,828 | 39,170 | 119 |
 | i2b2 smoking | 4,518 | 6 | 1,506 |
 | i2b2 obesity | 55,346 | 280 | 1,118 |
-| **emrQA** | **479,304** | **1,265,283** | **3,431** |
+| **emrQA (total)** | **479,304** | **1,265,283** | **3,431** |
 
 
 ## Requirements
