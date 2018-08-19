@@ -1,15 +1,31 @@
-from os import listdir
-from os.path import isfile, join
 import xmltodict
 import csv
 import json
+import argparse
+import os
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--i2b2_dir', default='', help='Directory containing i2b2 obesity challange files')
+parser.add_argument('--templates_dir', default='', help='Directory containing template files in the given format')
+parser.add_argument('--output_dir', default='', help='Directory to store the output')
+args = parser.parse_args()
+
+###################################################### SET FILE PATHS ##################################################################
+
+templates_file = args.templates_dir
+obesity_file_path = i2b2_file_paths = args.i2b2_dir
+
+file_names = ["obesity_standoff_annotations_test.xml","obesity_standoff_annotations_training.xml"]
+note_names = ["obesity_patient_records_test.xml", "obesity_patient_records_training.xml"]
+
+ql_output = os.path.join(args.output_dir,"obesity-ql.csv")
+qa_json_out = os.path.join(args.output_dir,"obesity-qa.json")
+
+######################################################## CODE #########################################################################
 
 def ReadFile():
 
-    file_path = "/home/anusri/Desktop/IBM/i2b2/obesity/"
-    file_names = ["obesity_standoff_annotations_test.xml","obesity_standoff_annotations_training.xml"]
-    note_names = ["obesity_patient_records_test.xml", "obesity_patient_records_training.xml"]
-
+    file_path = obesity_file_path
 
     Patient = {} #note_id is the key with a dictionary as value
 
@@ -75,7 +91,137 @@ def ReadFile():
 
     return Patient
 
+def MakeJSONOut(obesity_data,json_out,Patient):
 
+
+    obesity_out = {"paragraphs": [], "title": "obesity"}
+
+    for note_id in Patient:
+        Y_class = []
+        U_class = []
+        Q_class = []
+        N_class = []
+        patient_note = Patient[note_id]["text"]
+        out = {"note_id": note_id, "context": patient_note, "qas": []}
+        unique_questions = []
+
+        for problem in Patient[note_id]:
+            if problem == "text":
+                continue
+            if Patient[note_id][problem] == "Y":
+                Y_class.append(problem)
+            elif Patient[note_id][problem] == "N":
+                N_class.append(problem)
+            elif Patient[note_id][problem] == "U":
+                U_class.append(problem)
+            elif Patient[note_id][problem] == "Q":
+                Q_class.append(problem)
+            else:
+                print(Patient[note_id][problem])
+
+        ######  not doing on all questions #####
+
+        for row in obesity_data:
+            question = row[2].strip()
+            if question == "":
+                continue
+            lform = row[3]
+            answer_type = row[4]
+            question = question.replace("\t", "")
+            lform = lform.replace("\t", "")
+            orginal = question
+
+            if answer_type == "problems":
+                for idx in range(len(Y_class)):
+                    problem = Y_class[idx]
+                    question = orginal
+
+                    if problem == "Obesity":
+                        qwords = question.split("|")
+                        qwords[1] = problem
+                        lform_new = lform.replace("|problem|",problem)
+                        qwords = [word.strip() for word in qwords]
+                        final_question = " ".join(qwords)
+                        Answer = Y_class[0:idx] + Y_class[idx + 1:]
+                    else:
+                        question = orginal.replace("|problem|", problem)
+                        lform_new = lform.replace("|problem|", problem)
+                        filewriter_forlform.writerow([question] + [lform_new] + [question] + [lform])
+                        continue
+
+                    ans_list = []
+                    for ans in Answer:
+                        ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
+
+                    answer = {"answers": ans_list, "id": [[final_question,final_question],lform], "question": final_question}
+                    out["qas"].append(answer)
+
+                    filewriter_forlform.writerow([question] + [lform_new] + [question] + [lform])
+
+            elif answer_type == "yes/no" and "|problem|" in question:
+                answers = ["yes", "no", "UNK"]
+                jdx = -1
+                question_template = question.split("##")
+                for temp in [Y_class, N_class, U_class]:
+                    jdx += 1
+                    orginal_lform = lform
+                    question_lits = question.replace("|problem|",problem).split("##")
+                    lform_new = lform.replace("|problem|", problem)
+
+                    idx = 0
+                    if question_lits not in unique_questions:
+                        unique_questions.append(question_lits)
+
+                    for question in question_lits:
+                        filewriter_forlform.writerow([question] + [lform_new] + [question_template[idx]] + [orginal_lform])
+
+                        idx += 1
+                        Answer = [answers[jdx]]
+                        ans_list = []
+                        for ans in Answer:
+                            ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
+
+                    answer = {"answers": ans_list, "id": [zip(question_lits,question_template),orginal_lform], "question": question_lits}
+
+                    out["qas"].append(answer)
+            else:
+                print(answer_type)
+
+        obesity_out["paragraphs"].append(out)
+
+    with open(json_out, 'w') as outfile:
+        json.dump(obesity_out, outfile)
+
+
+if __name__=="__main__":
+
+    ofile = open(ql_output, "w")
+    filewriter_forlform = csv.writer(ofile, delimiter="\t")
+    filewriter_forlform.writerow(["Question", "Logical Form"])
+
+    ### Read i2b2 files ###
+
+    Patient = ReadFile()
+
+    ### File to read templates ###
+
+    qfile = open(templates_file)
+    read_data = list(csv.reader(qfile))
+
+    ## read only templates relevant to obesity challenge ##
+
+    obesity_data = []
+    for line in read_data[1:]:
+        if line[0] != "obesity":
+            continue
+        obesity_data.append(line)
+
+
+    MakeJSONOut(obesity_data,qa_json_out,Patient)
+    #MakeQuestion(questions_file,out_file,Patient)
+
+
+'''
 def MakeQuestion(questions_file,out_file,Patient):
 
     qfile = open(questions_file)
@@ -148,156 +294,4 @@ def MakeQuestion(questions_file,out_file,Patient):
                     print(Patient[note_id].keys())
             else:
                 print(answer_type,question_in)
-
-def MakeJSONOut(questions_file,json_out,Patient):
-    qfile = open(questions_file)
-    read_data = list(csv.reader(qfile))
-    obesity_data = []
-    for line in read_data[1:]:
-        #print(line)
-        if line[0] != "obesity":
-            continue
-        obesity_data.append(line)
-    #print(obesity_data)
-    obesity_out = {"paragraphs": [], "title": "obesity"}
-    for note_id in Patient:
-        Y_class = []
-        U_class = []
-        Q_class = []
-        N_class = []
-        patient_note = Patient[note_id]["text"]
-        out = {"note_id": note_id, "context": patient_note, "qas": []}
-
-        for problem in Patient[note_id]:
-            if problem == "text":
-                continue
-            if Patient[note_id][problem] == "Y":
-                Y_class.append(problem)
-            elif Patient[note_id][problem] == "N":
-                N_class.append(problem)
-            elif Patient[note_id][problem] == "U":
-                U_class.append(problem)
-            elif Patient[note_id][problem] == "Q":
-                Q_class.append(problem)
-            else:
-                print(Patient[note_id][problem])
-        for row in obesity_data: ################## not doing on all questions ###
-            question = row[2].strip()
-            if question == "":
-                continue
-            #print(row)
-            answer_type = row[4]
-            lform = row[3]
-            question = question.replace("\t", "")
-            lform = lform.replace("\t", "")
-            orginal = question
-            if answer_type == "problems":
-                for idx in range(len(Y_class)):
-                    problem = Y_class[idx]
-                    question = orginal
-                    if problem == "Obesity":
-                        qwords = question.split("|")
-                        qwords[1] = problem
-                        lform_new = lform.replace("|problem|",problem)
-                        qwords = [word.strip() for word in qwords]
-                        final_question = " ".join(qwords)
-                        Answer = Y_class[0:idx] + Y_class[idx + 1:]
-                    else:
-                        question = orginal.replace("|problem|", problem)
-                        lform_new = lform.replace("|problem|", problem)
-                        filewriter_forlform.writerow([question] + [lform_new] + [question] + [lform])
-                        continue
-                    q_id = question_id[question]
-                    l_id = logicalform_id[lform]
-                    ans_list = []
-                    for ans in Answer:
-                        ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
-                    answer = {"answers": ans_list, "id": [[question,q_id],lform], "question": final_question}
-                    out["qas"].append(answer)
-                    filewriter_forlform.writerow([question] + [lform_new] + [question] + [lform])
-            elif answer_type == "yes/no" and "|problem|" in question:
-                answers = ["yes", "no", "UNK"]
-                jdx = -1
-                question_template = question.split("##")
-                for temp in [Y_class, N_class, U_class]:
-                    jdx += 1
-                    orginal_lform = lform
-                    question_lits = question.replace("|problem|",problem).split("##")
-                    lform_new = lform.replace("|problem|", problem)
-                    tuple_id = []
-                    idx = 0
-                    for question in question_lits:
-                        q_id = question_id[question_template[idx]]
-                        if [question,q_id] not in tuple_id:
-                            tuple_id.append([question,q_id])
-                            filewriter_forlform.writerow([question] + [lform_new] + [question_template[idx]] + [orginal_lform])
-
-                        idx += 1
-                        Answer = [answers[jdx]]
-                        ans_list = []
-                        for ans in Answer:
-                            ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
-                    answer = {"answers": ans_list, "id": [tuple_id,orginal_lform], "question": question_lits}
-                    out["qas"].append(answer)
-
-            elif answer_type == "yes/no":
-                '''
-                try:
-                    ans_list = []
-                    if Patient[note_id]["Obesity"] == "Y":
-                        Answer = ["yes"]
-                        for ans in Answer:
-                            ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
-                        answer = {"answers": ans_list, "id": "", "question": question}
-                        out["qas"].append(answer)
-                        #print(question, Answer)
-                    if Patient[note_id]["Obesity"] == "N":
-                        Answer = ["no"]
-                        for ans in Answer:
-                            ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
-                        answer = {"answers": ans_list, "id": "", "question": question}
-                        out["qas"].append(answer)
-                    if Patient[note_id]["Obesity"] == "U":
-                        Answer = [""]
-                        for ans in Answer:
-                            ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
-                        answer = {"answers": ans_list, "id": "", "question": question}
-
-                        out["qas"].append(answer)
-                
-                except:
-                    print(Patient[note_id].keys())
-                '''
-            else:
-                print(answer_type)
-
-        obesity_out["paragraphs"].append(out)
-
-    with open(json_out, 'w') as outfile:
-        json.dump(obesity_out, outfile)
-
-
-
-question_id = {}
-logicalform_id = {}
-
-csvreader = (csv.reader(open("/home/anusri/Desktop/codes_submission/dataset_indexing/questions_index.csv")))
-for listi in csvreader:
-    question_id[listi[0]] = listi[1]
-
-csvreader = (csv.reader(open("/home/anusri/Desktop/codes_submission/dataset_indexing/logical_forms_index.csv")))
-for listi in csvreader:
-    logicalform_id[listi[0]] = listi[1]
-
-
-questions_file = "templates-all.csv"
-out_file = "obesity-question-answers.csv"
-json_out = "obesity.json"
-
-ofile = open("/home/anusri/Desktop/IBM/Answers-old/combine/ql_dataset/obesity.csv", "w")
-filewriter_forlform = csv.writer(ofile, delimiter="\t")
-filewriter_forlform.writerow(["Question", "Logical Form"])
-
-Patient = ReadFile()
-#MakeQuestion(questions_file,out_file,Patient)
-MakeJSONOut(questions_file,json_out,Patient)
+'''
