@@ -41,7 +41,7 @@ The data can be generated using the NLP Datasets from the [i2b2 Challenges][i2b2
 In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
 
 The following scrpits require Python 2.7. 
-Run the following commands to clone the repository and install DrQA:
+Run the following commands to clone the repository and install emrQA:
 
 ```bash
 git clone https://github.com/emrqa/emrQA.git
