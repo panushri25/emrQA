@@ -35,6 +35,12 @@ Some statistics of the generated data:
 | i2b2 obesity | 55,346 | 280 | 1,118 |
 | **emrQA (total)** | **479,304** | **1,265,283** | **3,431** |
 
+**UPDATES**
+```
+27th August 2018: Extended the i2b2 obesity question-answer pairs to obesity comorbidities. 
+20th August 2018: Added QA pairs generated from i2b2 relations (assertions). 
+27th Jun 2018: Dataset as decribed in the paper. 
+```
 
 ## Requirements
 
