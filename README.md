@@ -23,7 +23,7 @@ In this work, we address the lack of any publicly available EMR Question Answeri
 
 This repository includes the question and logical form templates provided by our experts and the code for generating the emrQA dataset from these templates and the i2b2 challenge datasets. Note that this work is a refactored and extended version of the orginal dataset described in the paper.
 
-Some statistics of the generated data:
+Some statistics of the current version of the generated data:
 
 | Datasets | QA pairs | QL pairs | #Clinical Notes | 
 | :------: | :------: | :------: | :----: | 
@@ -35,7 +35,7 @@ Some statistics of the generated data:
 | i2b2 obesity | 55,346 | 280 | 1,118 |
 | **emrQA (total)** | **479,304** | **1,265,283** | **3,431** |
 
-**UPDATES**
+**UPDATES:**
 ```
 27th August 2018: Extended the i2b2 obesity question-answer pairs to obesity comorbidities. 
 20th August 2018: Added QA pairs generated from i2b2 relations (assertions). 
@@ -61,27 +61,42 @@ A thorough discussion of the output format of these files is presented below.
 
 #### Question-Answer (JSON) Format
 
-The `reader` directory scripts expect the datasets as a `.json` file where the data is arranged like SQuAD:
+The json files in `output\` directory have the following format:
 
 ```
-file.json
+data.json
 ├── "data"
-│   └── [i]
-│       ├── "paragraphs"
-│       │   └── [j]
-│       │       ├── "context": "paragraph text"
-│       │       └── "qas"
-│       │           └── [k]
-│       │               ├── "answers"
-│       │               │   └── [l]
-│       │               │       ├── "answer_start": N
-│       │               │       └── "text": "answer"
-│       │               ├── "id": "<uuid>"
-│       │               └── "question": "paragraph question?"
-│       └── "title": "document id"
-└── "version": 1.1
+   └── [i]
+       ├── "paragraphs"
+       │   └── [j]
+       │       ├── "note_id": "clinical note id"
+       │       ├── "context": "clinical note text"
+       │       └── "qas"
+       │           └── [k]
+       │               ├── "answers"
+       │               │   └── [l]
+       │               │       ├── "answer_start"
+       │               │       │             └── [m]
+       │               │       │                 ├── "start_line" : N
+       │               │       │                 └── "start_token": N
+       │               │       │ 
+       │               │       ├──"text": "answer as a concept"
+       │               │       │
+       │               │       ├──"evidence": "answer line"
+       │               │       │     
+       │               │       └── "evidence_start": "line start" 
+       │               │ 
+       │               ├── "id": "<uuid>"              |
+       │               │ 
+       │               │   
+       │               └── "question": "paragraph question?"
+       │ 
+       └── "title": "i2b2 challenge name"
+
 ```
 
+Scripts provided in `generation/combine_data/squad_format.py` convert the given format into squad format where line in the clinical note which holds the answer is used as answer text as described in the paper.
+`
 #### Question-Logical Form (CSV) Format
 
 
