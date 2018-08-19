@@ -1,61 +1,73 @@
 import csv
 from os import listdir
 from os.path import isfile, join
-import itertools
-from textblob import TextBlob
 import nltk
-from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import wordnet as wn
 from problem_classfiers import concept_is_CommonNoun, concept_is_PastTense
-import string
 import json
 import sys
 reload(sys)
 sys.setdefaultencoding("ISO-8859-1")
 import random
 import argparse
+import os
 
 ## Resolve the use of medications and treatments
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--i2b2_dir', default='', help='Directory containing i2b2 relations challange files')
+parser.add_argument('--templates_dir', default='', help='Directory containing template files in the given format')
+parser.add_argument('--output_dir', default='', help='Directory to store the output')
+args = parser.parse_args()
 
 ###################################################### SET FILE PATHS ##################################################################
 
 ## i2b2 file paths ##
 
-RelationsFilePath = [
-            "/home/anusri/Desktop/IBM/i2b2/relations/concept_assertion_relation_training_data/partners/rel/",
-            "/home/anusri/Desktop/IBM/i2b2/relations/concept_assertion_relation_training_data/beth/rel/",
-            "/home/anusri/Desktop/IBM/i2b2/relations/test_data/rel/"]
+relations_folder = args.i2b2_dir
 
-NoteFilePath = [
-            "/home/anusri/Desktop/IBM/i2b2/relations/concept_assertion_relation_training_data/partners/txt/",
-            "/home/anusri/Desktop/IBM/i2b2/relations/concept_assertion_relation_training_data/beth/txt/",
-            "/home/anusri/Desktop/IBM/i2b2/relations/test_data/txt/"]
+FilePath = [ "concept_assertion_relation_training_data/partners/rel/", "concept_assertion_relation_training_data/beth/rel/", "test_data/rel/"]
 
-AstFilePath = [ "/home/anusri/Desktop/IBM/i2b2/relations/concept_assertion_relation_training_data/partners/ast/",
-            "/home/anusri/Desktop/IBM/i2b2/relations/concept_assertion_relation_training_data/beth/ast/",
-            "/home/anusri/Desktop/IBM/i2b2/relations/test_data/ast/"]
+RelationsFilePath = []
+
+for file in FilePath:
+    RelationsFilePath.append(os.path.join(relations_folder,file))
+
+FilePath = ["concept_assertion_relation_training_data/partners/txt/", "concept_assertion_relation_training_data/beth/txt/","test_data/txt/"]
+
+NoteFilePath = []
+
+for file in FilePath:
+    NoteFilePath.append(os.path.join(relations_folder,file))
+
+FilePath = [ "concept_assertion_relation_training_data/partners/ast/", "concept_assertion_relation_training_data/beth/ast/", "test_data/ast/"]
+
+AstFilePath = []
+for file in FilePath:
+    AstFilePath.append(os.path.join(relations_folder,file))
 
 ## template file path ##
 
-template_file_path = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
+template_file_path = args.templates_dir
 
 ## matching notes in temporal, coreference and relations dataset ##
 
-matching_notes = "/home/anusri/Desktop/IBM/Answers-old/temporal/matching_notes.csv"
+matching_notes = os.path.join("generation/i2b2_relations/", "matching_notes.csv")
 
 ## output file paths ##
 
 #qa_output = "/home/anusri/Desktop/emrQA/output/relations-qa.csv"
-ql_output = "/home/anusri/Desktop/emrQA/output/relations-ql.csv"
-relations_qa_output_json = "/home/anusri/Desktop/emrQA/output/relations-qa.json"
-#relations_ql_output_json = "/home/anusri/Desktop/emrQA/output/relations-ql.json"
+ql_output = os.path.join(args.output_dir,"relations-ql.csv")
+relations_qa_output_json = os.path.join(args.output_dir,"relations-qa.json")
+
 
 ### write to csv file for viz ##
 
 qa_csv_write  = False
 ql_csv_write  = True
+
+######################################################## CODE #########################################################################
 
 class GenerateRelationsQuestions():
 
@@ -113,7 +125,7 @@ class GenerateRelationsQuestions():
 
         match_file = open(matching_notes)
         csvreader = csv.reader(match_file)
-        matching_files = list(csvreader)  # temporal, relation, coreference
+        matching_files = list(csvreader)  #  relation, coreference
 
         Coreference_Note = {}
         self.CoreferenceCluster_to_Entity_map = {}
@@ -122,8 +134,9 @@ class GenerateRelationsQuestions():
         ### Create coreference clusters for every type in every note and give each cluster an id.  ###
 
         for file in matching_files[1:]:
-            relation_note_id = file[1].split("/")[-1].split(".")[0]
-            coreference_path = file[2]
+            file = file[0].split("\t")
+            relation_note_id = file[0].split("/")[-1].split(".")[0]
+            coreference_path = file[1]
             coreferences = self.ReadCoreference(coreference_path, self.ClinicalNotes[relation_note_id])
             Coreference_Note[relation_note_id] = coreferences
 
@@ -1277,5 +1290,5 @@ class GenerateRelationsQuestions():
 
 
 
-
-GenerateRelationsQuestions()
+if __name__=="__main__":
+    GenerateRelationsQuestions()
