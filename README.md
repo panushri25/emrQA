@@ -32,7 +32,7 @@ Some statistics of the current version of the generated data:
 | i2b2 medications | 255,908 | 198,739 | 261 |
 | i2b2 heart disease risk | 30,731 | 36,746 | 119 |
 | i2b2 smoking | 4,518 | 6 | 502 |
-| i2b2 obesity | 3,72,205) | 352 | 1,118 |
+| i2b2 obesity | 3,72,205 | 352 | 1,118 |
 | **emrQA (total)** | **2,072,635** | **1,296,091** | **2,425** |
 
 **UPDATES:**
