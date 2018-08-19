@@ -3,7 +3,7 @@ import nltk
 from nltk.corpus import stopwords
 
 ## Open common names to use in is_common_noun function ##
-file = open("/home/anusri/Desktop/emrQA/generation/i2b2_relations/common_names.txt") ## you can use any set of common nouns to filter, here we call the top 500 high frequency words occuring in our templates as commoun nouns ##
+file = open("generation/i2b2_relations/common_names.txt") ## you can use any set of common nouns to filter, here we call the top 500 high frequency words occuring in our templates as commoun nouns ##
 data = file.readlines()
 file.close()
 common_nouns = [line.strip() for line in data]
