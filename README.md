@@ -29,7 +29,7 @@ Some statistics of the generated data:
 | i2b2 relations (concepts, relations)| 141,243 | 245,486 | 425 |
 | i2b2 relations (assertions) | 1,268,029 | 816,224  | 425  |
 | i2b2 medications | 255,908 | 198,739 | 261 |
-| i2b2 heart disease risk | 53,828 | 39,170 | 119 |
+| i2b2 heart disease risk | 30,731 | 36,746 | 119 |
 | i2b2 smoking | 4,518 | 6 | 1,506 |
 | i2b2 obesity | 55,346 | 280 | 1,118 |
 | **emrQA (total)** | **479,304** | **1,265,283** | **3,431** |
@@ -44,8 +44,8 @@ The following scrpits require Python 2.7.
 Run the following commands to clone the repository and install DrQA:
 
 ```bash
-git clone https://github.com/facebookresearch/DrQA.git
-cd DrQA; pip install -r requirements.txt; python setup.py develop
+git clone https://github.com/emrqa/emrQA.git
+cd emrQA; pip install -r requirements.txt
 ```
 To generate emrQA, first [download](#downloading-i2b2) the i2b2 challenge datasets. 
 
