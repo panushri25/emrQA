@@ -1,32 +1,35 @@
-import random
 from os import listdir
-import xml.etree.ElementTree
 import xmltodict
-import nltk
-import numpy as np
 import csv
 import sys
-reload(sys)
-sys.setdefaultencoding("ISO-8859-1")
 import json
 import random
-#"Glucose":"126 (2 fasting blood glucose measurments)"
+import argparse
+import os
+reload(sys)
+sys.setdefaultencoding("ISO-8859-1")
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--i2b2_dir', default='', help='Directory containing i2b2 heart disease risk challange files')
+parser.add_argument('--templates_dir', default='', help='Directory containing template files in the given format')
+parser.add_argument('--output_dir', default='', help='Directory to store the output')
+args = parser.parse_args()
 
 ###################################################### SET FILE PATHS ##################################################################
 
 ## i2b2 file paths ##
 
-RiskFilePath = ["/home/anusri/Desktop/IBM/i2b2/heart-disease-risk/training-RiskFactors-Complete-Set1/"]
+RiskFilePath = [os.path.join(args.i2b2_dir,"training-RiskFactors-Complete-Set1/")]
 
 ## template file path ##
 
-template_file_path = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
+template_file_path = args.templates_dir
 
 ## output file paths ##
 
-qa_output = "/home/anusri/Desktop/emrQA/output/risk-qa.csv"
-ql_output = "/home/anusri/Desktop/emrQA/output/risk-ql.csv"
-risk_qa_output_json = "/home/anusri/Desktop/emrQA/output/risk-qa.json"
+qa_output = os.path.join(args.output_dir,"risk-qa.csv")
+ql_output = os.path.join(args.output_dir,"risk-ql.csv")
+risk_qa_output_json = os.path.join(args.output_dir,"risk-qa.json")
 
 
 ######################################################## CODE #########################################################################
