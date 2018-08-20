@@ -1,18 +1,120 @@
 import json
+import csv
+import random
+import argparse
+import os
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--output_dir', default='/home/anusri/Desktop/emrQA/output/', help='Directory of output files')
+
+args = parser.parse_args()
+
+###################################################### SET FILE PATHS ##################################################################
+
+medications = json.load(open(os.path.join(args.output_dir,"medication-qa.json")))
+relations = json.load(open(os.path.join(args.output_dir,"relations-qa.json")), encoding="latin-1")
+risk = json.load(open(os.path.join(args.output_dir,"risk-qa.json")))
+smoking = json.load(open(os.path.join(args.output_dir,"smoking-qa.json")))
+obesity = json.load(open(os.path.join(args.output_dir,"obesity-qa.json")))
 
 
-medications = json.load(open("/home/anusri/Desktop/codes_submission/Answers/medication/medications-QA-updated.json"))
-smoking = json.load(open("/home/anusri/Desktop/codes_submission/Answers/smoking/smoking.json"))
-obesity = json.load(open("/home/anusri/Desktop/codes_submission/Answers/obesity/obesity.json"))
-relations = json.load(open("/home/anusri/Desktop/codes_submission/Answers/relations/relations.json"), encoding="latin-1")
-risk = json.load(open("/home/anusri/Desktop/codes_submission/Answers/longitudnal-test/risk-QA.json"))
-data = [medications, smoking, obesity, relations, risk]
+######################################################## CODE #########################################################################
 
-json_out = "data.json"
+data = [medications, relations, risk, smoking, obesity]
+data_out = {"data": data}
+json_out = os.path.join(args.output_dir,"data.json")
 with open(json_out, 'w') as outfile:
-    json.dump(data, outfile,  encoding="latin-1")
+    json.dump(data_out, outfile,  encoding="latin-1")
 
-''
+total_clinical_notes = 0
+all_questions = []
+all_clinical_notes = []
+for dataset in data:
+
+    for note in dataset["paragraphs"]:
+        total_clinical_notes += 1
+        if " ".join(note["context"]) not in all_clinical_notes:
+            all_clinical_notes.extend([" ".join(note["context"])])
+        else:
+           #print("repeat")
+           continue
+
+        for questions in note["qas"]:
+            #print(questions["question"])
+            all_questions.append(list(set(questions["question"])))  # all questions
+
+out = []
+count = {}
+print("Total Clinical Notes", len(all_clinical_notes))
+total_question = len(all_questions)
+totals = 0
+questions_list = []
+for value in all_questions:
+    #print(value)
+    if type(value) != list:
+        print("error")
+    if len(value[0]) == 1:
+        print(value)
+    #out.append([len(value[0]),len(value),"\t".join(value)])
+    #if len(value) not in count:
+    #    count[len(value)] = []
+    totals += len(value)
+    questions_list.extend(value)
+
+'''
+print(len(count))
+new_list = sorted(out, key=lambda x: x[1], reverse=True)
+
+ofile = open("testing","w")
+for val in new_list:
+    ofile.write("\t".join(map(str,val)))
+    ofile.write("\n")
+
+ofile.close()
+'''
+## Average Question Length ##
+
+print("Total Number  Of Questions", totals)
+print("Total number of question types", total_question)
+
+##################################################################################################################################
+
+medications = os.path.join(args.output_dir,"medication-ql.csv")
+relations = os.path.join(args.output_dir,"relations-ql.csv")
+risk = os.path.join(args.output_dir,"risk-ql.csv")
+smoking = os.path.join(args.output_dir,"smoking-ql.csv")
+obesity = os.path.join(args.output_dir,"obesity-ql.csv")
+
+data = data = [medications, relations, risk, smoking, obesity]
+
+unique = set()
+
+
+for file_path in data:
+    file = open(file_path)
+    filereader = list(csv.reader(file))
+
+    for line in filereader[1:]:
+        unique.add(tuple(line))
+        #if random.randint(1,100) < 10:
+            #print(line)
+
+values = list(unique)
+
+print("Total number of QL forms", len(values))
+
+final_out = os.path.join(args.output_dir,"data-ql.csv")
+ofile = open(final_out, "w")
+writer = csv.writer(ofile, delimiter="\t")
+writer.writerow(["Question", "Logical Form", "QTemplate", "LTemplate"])
+
+for val in values:
+    writer.writerow(val)
+
+ofile.close()
+
+
+'''
 
 datasets = json.load(open("data.json"))
 for dataset in datasets:
@@ -34,6 +136,7 @@ for dataset in datasets:
 
                 print(answer_text,answer_start,evidence)
 
+'''
 '''
 use_evidence_model = "True"
 
