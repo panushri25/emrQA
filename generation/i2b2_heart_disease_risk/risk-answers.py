@@ -1516,7 +1516,7 @@ class RiskFileAnalysis():
                         if val not in ans_list:
                             ans_list.append(val)  # evidence will have q_line_answer_line
 
-                    answer_temp = {"answers": ans_list, "id": [values[0], logical_form_orginal],"question": list(list(zip(*values[0])[0])),"orginal_template": ",".join(question_list)}
+                    answer_temp = {"answers": ans_list, "id": [values[0], logical_form_orginal],"question": list(list(zip(*values[0])[0]))}
                     answer_out.append(answer_temp)
 
         return answer_out
