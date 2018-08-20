@@ -150,11 +150,16 @@ python evaluation/basic-stats.py --output_dir output/
 To run the scripts that finds (1) the average number of paraphrase templates (2) Jaccard and BLEU Score of parapharase templates
 
 ```bash
-python evaluation/paraphrase-analysis --templates_dir output/
+python evaluation/paraphrase-analysis --templates_dir templates/
 ```
 
 #### Logical form template analysis
 
+To run the scripts that filter logical form templates with specific properties,
+
+```bash
+python evaluation/template-analysis.py --templates_dir templates/
+```
 
 ## Baselines
 
