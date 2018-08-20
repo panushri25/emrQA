@@ -123,6 +123,7 @@ def MakeJSONOut(obesity_data,json_out,Patient):
 
         for row in obesity_data:
             question = row[2].strip()
+
             if question == "":
                 continue
             lform = row[3]
@@ -152,8 +153,8 @@ def MakeJSONOut(obesity_data,json_out,Patient):
                     ans_list = []
                     for ans in Answer:
                         ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
-
-                    answer = {"answers": ans_list, "id": [[final_question,final_question],lform], "question": final_question}
+                    #print(final_question)
+                    answer = {"answers": ans_list, "id": [[final_question,final_question],lform], "question": [final_question]}
                     out["qas"].append(answer)
 
                     filewriter_forlform.writerow([question] + [lform_new] + [question] + [lform])
@@ -162,28 +163,30 @@ def MakeJSONOut(obesity_data,json_out,Patient):
                 answers = ["yes", "no", "UNK"]
                 jdx = -1
                 question_template = question.split("##")
+                #print(question)
                 for temp in [Y_class, N_class, U_class]:
                     jdx += 1
-                    orginal_lform = lform
-                    question_lits = question.replace("|problem|",problem).split("##")
-                    lform_new = lform.replace("|problem|", problem)
+                    for problem in temp:
+                        orginal_lform = lform
+                        question_lits = question.replace("|problem|",problem).split("##")
+                        lform_new = lform.replace("|problem|", problem)
+                        #print(question_lits)
+                        idx = 0
+                        if question_lits not in unique_questions:
+                            unique_questions.append(question_lits)
 
-                    idx = 0
-                    if question_lits not in unique_questions:
-                        unique_questions.append(question_lits)
+                        for q in question_lits:
+                            filewriter_forlform.writerow([q] + [lform_new] + [question_template[idx]] + [orginal_lform])
+                            idx += 1
 
-                    for question in question_lits:
-                        filewriter_forlform.writerow([question] + [lform_new] + [question_template[idx]] + [orginal_lform])
-
-                        idx += 1
                         Answer = [answers[jdx]]
                         ans_list = []
                         for ans in Answer:
                             ans_list.append({"answer_start": "", "text": ans, "evidence": "", "evidence_start": ""})
 
-                    answer = {"answers": ans_list, "id": [zip(question_lits,question_template),orginal_lform], "question": question_lits}
+                        answer = {"answers": ans_list, "id": [zip(question_lits,question_template),orginal_lform], "question": question_lits}
 
-                    out["qas"].append(answer)
+                        out["qas"].append(answer)
             else:
                 print(answer_type)
 
