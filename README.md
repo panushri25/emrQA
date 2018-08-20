@@ -44,7 +44,7 @@ Some statistics of the current version of the generated data:
 
 To generate emrQA, first download the NLP Datasets from the [i2b2 Challenges][i2b2-datasets] accessible by everyone subject to a license agreement. You will need to download and extract all the datasets corresponding to given a challenge (e.g 2009 Medications Challenge) at a specfic folder location. Once completed, update the path location in `main.py`.  In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
 
-The generation scrpits in the repo require Python 2.7. Run the following commands to clone the repository and install the the requirements for emrQA:
+The generation scrpits in the repo require Python 2.7. Run the following commands to clone the repository and install the requirements for emrQA:
 
 ```bash
 git clone https://github.com/emrqa/emrQA.git
@@ -63,19 +63,19 @@ A thorough discussion of the output format of these files is presented below.
 Each row in the csv file has the following format:
 
 ```
-"dataset"  \t  "question templates"  \t  "logical for templates"  \t  "answer type" \t "sub-answer-type"
+"dataset"  \t  "question templates"  \t  "logical form templates"  \t  "answer type" \t "sub-answer-type"
 ```
 
-A brief explantion how they are used in the scripts,
+A brief explantion how following fields are used in `main.py`,
 
 ```
-dataset: The i2b2 challenge dataset annotations to be used for the templates. This field should be one of the following values, medications, relations, risk, smoking, obesity.
+dataset: The i2b2 challenge dataset annotations to be used for the templates in that row. This field should be one of the following values, medications, relations, risk, smoking or obesity.
  
 question templates: All the question paraphrase templates are provided as a string seperated by ##.
 
-logical form templates: The logical form template exper annotated for the question templates.
+logical form templates: The logical form template expert annotated for the question templates.
 
-answer type: 
+answer type: The output type
 
 sub-answer-type:
 ```
@@ -139,12 +139,19 @@ Each row in the csv file has the following format,
 
 #### Basic statistics
 
+To run the scripts that finds the basic statistics of the dataset, such as average question length etc, do.
+
 ```bash
-python evaluation/analysis.py --output_dir output/
+python evaluation/basic-stats.py --output_dir output/
 ```
 
 #### Paraphrase analysis
 
+To run the scripts that finds (1) the average number of paraphrase templates (2) Jaccard and BLEU Score of parapharase templates
+
+```bash
+python evaluation/paraphrase-analysis --templates_dir output/
+```
 
 #### Logical form template analysis
 
