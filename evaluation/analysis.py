@@ -8,32 +8,28 @@ from random import *
 from nltk import sent_tokenize
 from nltk import word_tokenize
 import random
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--output_dir', default='output/', help='Directory to store the output')
+
+args = parser.parse_args()
 
 #os.environ['STANFORD_PARSER'] = '/home/anusri/Desktop/codes_submission/packages/stanford-jars/'
 #os.environ['STANFORD_MODELS'] = '/home/anusri/Desktop/codes_submission/packages/stanford-jars'
 #tokenizer = StanfordTokenizer("/home/anusri/Desktop/codes_submission/packages/stanford-jars/stanford-postagger.jar")
 #from matplotlib2tikz import save as tikz_save
 
-#["medications","relations","risk-dataset"]
-## Medications QA: 25070
-## Relations QA: 32157
-## Risk dataset QA: 3313
-## Obesity QA:
-## Smoking QA: 1506
-## title : medication, risk-dataset, relations, obesity, smokin
-
 def LengthStatistics(list_values):
 
     metrics = {}
     Total_values= len(list_values)
-    Total_Tokens = 0
+    Total_Tokens = 0.0
     #print(Total_values)
     for question in list_values:
         words = word_tokenize(question.strip())
         words = [word for word in words if word != ""]
-        #print(words)
         Total_Tokens += len(words)
-        #print(Total_Tokens)
 
     Avg_token_length = Total_Tokens / Total_values
     metrics["question_length"] = Total_values
@@ -48,7 +44,7 @@ tests = []
 
 if __name__ == '__main__':
 
-    data_file = "/home/anusri/Desktop/emrQA/output/data.json"
+    data_file = os.path.join(args.output_dir,"data.json")
     datasets = json.load(open(data_file), encoding="latin-1")
 
     all_questions = []
@@ -57,14 +53,10 @@ if __name__ == '__main__':
     total_clinical_notes = 0
     number_of_answers_per_question = {}
 
-    #num_answers = []
     total_evidences = []
 
 
-    for dataset in datasets:
-        #if dataset["title"] in ["obesity","smoking"]:
-        #    continue
-        # random.shuffle(dataset["paragraphs"])
+    for dataset in datasets["data"]:
 
         print("Processing dataset",dataset["title"])
 
@@ -73,21 +65,23 @@ if __name__ == '__main__':
 
             if " ".join(note["context"]) not in all_clinical_notes:
                 all_clinical_notes.extend([" ".join(note["context"])])
+            else:
+                continue
 
             for questions in note["qas"]:
-                #print(questions["question"])
 
                 all_answers = []
                 evidences = []
 
                 all_questions.append(list(set(questions["question"]))) # all questions
-                #print(questions["answers"])
+
                 for answer in questions["answers"]:
 
-                    if dataset["title"] == "obesity":
-                        for txt in answer["text"]:
-                            if txt not in all_answers:
-                                all_answers.append(txt)
+                    if dataset["title"] == "obesity" or dataset["title"] == "smoking":
+                        continue
+                        #for txt in answer["text"]:
+                        #    if txt not in all_answers:
+                        #        all_answers.append(txt)
                     else:
                         if answer["answer_start"][0] != "":
                             if answer["answer_start"] not in all_answers:
@@ -95,7 +89,8 @@ if __name__ == '__main__':
 
                                 if dataset["title"] == "risk-dataset":
                                     index = int(answer["answer_start"][0])
-                                    evidences.append(note["context"][index])
+                                    text = "\n".join(note["context"])
+                                    evidences.append(text[index])
                                 else:
                                     index = int(answer["answer_start"][0]) - 1
                                     evidences.append(note["context"][index])
@@ -115,20 +110,12 @@ if __name__ == '__main__':
                     number_of_answers_per_question[total_answers] = 0
                 number_of_answers_per_question[total_answers] += 1
 
-                #lform = questions["id"][1]
-                #if (lform,questions["id"][0]) not in forms_in_data:
-                #   forms_in_data.append((lform,questions["id"][0]) )
-
-    #with open('ql_lforms.json', 'w') as outfile:
-    #    json.dump(forms_in_data, outfile)
 
     print("Total Clinical Notes", total_clinical_notes, len(all_clinical_notes))
     total_question = len(all_questions)
     totals = 0
     questions_list = []
     for value in all_questions:
-        #print(value)
-        #print(len(value))
         totals += len(value)
         questions_list.extend(value)
 
@@ -141,14 +128,13 @@ if __name__ == '__main__':
 
     ## Average Evidence Length ##
 
-    #print(total_evidences)
     stats_evidences = LengthStatistics(total_evidences)
     print("Average evidence length",stats_evidences[1])
 
     ## Average Note Length ##
 
-    #stats_evidences = LengthStatistics(all_clinical_notes)
-    #print("Average evidence length", stats_evidences[1])
+    stats_evidences = LengthStatistics(all_clinical_notes)
+    print("Average clinical note length", stats_evidences[1])
 
     ## Average number of questions per note ##
 
@@ -168,8 +154,6 @@ if __name__ == '__main__':
     print("Average number of evidences", float(total__num_answers) / total_question)
     print("Percentage with one evidences",number_of_answers_per_question[1]*100.0/total_question)
     print("range in number of evidences",min(number_of_answers_per_question.keys()),max(number_of_answers_per_question.keys()))
-    #print("Percentage with ten evidence",ten_evidences*100.0/total_question)
-
 
     ################# more stats ignore for now ######################
 
