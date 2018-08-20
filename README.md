@@ -77,19 +77,26 @@ data.json
        │               │   └── [l]
        │               │       ├── "answer_start"
        │               │       │             └── [m]
-       │               │       │                 ├── integer (answer_line_start)
-       │               │       │                 └── integer ()
+       │               │       │                 ├── integer (line number in clinical note to find the answer entity)
+       │               │       │                 └── integer (token position in line to find the answer entity)
        │               │       │ 
        │               │       ├──"text": "answer entity"
        │               │       │
-       │               │       ├──"evidence": "evidence "
-       │               │       │     
-       │               │       └── "evidence_start": "line start" 
+       │               │       ├──"evidence": "evidence line to support the answer entity "
+       │               │       │
+       │               │       └── "evidence_start": integer (line number in clinical note to find the evidence line) 
        │               │ 
-       │               ├── "id": "<uuid>"              |
+       │               ├── "id" 
+       │               │    └─ [n]
+       │               │       ├──[o] 
+       │               │       │  ├── "paraphrase question"
+       │               │       │  └── "paraphrase question-template"
+       │               │       │ 
+       │               │       └── "logical-form-template"
        │               │ 
-       │               │   
-       │               └── "question": "paragraph question?"
+       │               └── "question"
+       │                    └──[p]
+       │                       └──"paraphrase question"
        │ 
        └── "title": "i2b2 challenge name"
 
