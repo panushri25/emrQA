@@ -77,12 +77,12 @@ data.json
        │               │   └── [l]
        │               │       ├── "answer_start"
        │               │       │             └── [m]
-       │               │       │                 ├── "start_line" : N
-       │               │       │                 └── "start_token": N
+       │               │       │                 ├── integer (answer_line_start)
+       │               │       │                 └── integer ()
        │               │       │ 
-       │               │       ├──"text": "answer as a concept"
+       │               │       ├──"text": "answer entity"
        │               │       │
-       │               │       ├──"evidence": "answer line"
+       │               │       ├──"evidence": "evidence "
        │               │       │     
        │               │       └── "evidence_start": "line start" 
        │               │ 
@@ -95,11 +95,18 @@ data.json
 
 ```
 
-Scripts provided in `generation/combine_data/squad_format.py` convert the given format into squad format where line in the clinical note which holds the answer is used as answer text as described in the paper.
-`
+To generate the data in the SQUAD format (input format for the [DrQA][drqa] baseline in the paper) run,
+
+```bash
+python generation/combine_data/squad_format.py --output_dir output/
+```
 #### Question-Logical Form (CSV) Format
 
+Each row in the csv file has the following format,
 
+```
+"question"	"logical-form"	"question-template"	"logical-form-template"	 
+```
 
 ## emrQA Analysis
 
@@ -107,3 +114,4 @@ Scripts provided in `generation/combine_data/squad_format.py` convert the given 
 
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
 [anusri-home]: https://www.linkedin.com/in/anusri-pampari-594bb5126/
+[drqa]: https://github.com/facebookresearch/DrQA
