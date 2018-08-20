@@ -347,7 +347,7 @@ class GenerateQA():
                           '''
 
                     answer_temp = {"answers": ans_list, "id": [tuple_orginal, intial_template],
-                                   "question": list(unique_paras), "orginal_template": intial_template}
+                                   "question": list(unique_paras)}
                     answer_out.append(answer_temp)
 
         return answer_out
