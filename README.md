@@ -15,7 +15,7 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 - [Data Analysis](#emrqa-analysis)
 - [Baselines](#baselines)
 
-##  Question Answering on Electronic Medical Records
+##  Question Answering on Electronic Medical Records (EMR)
 
 In this work, we address the lack of any publicly available EMR Question Answering (QA) corpus by creating a large-scale dataset, emrQA, using a novel semi-automated generation framework that allows for minimal expert involvement and re-purposes existing annotations available for other clinical NLP tasks. To briefly summarize the  generation process: (1) we collect questions from experts (2) convert them to templates by replacing entities with placeholders (3) expert annotate the templates with logical form templates and then (4) use annotations from existing NLP tasks (based on information in logical forms) to populate placeholders in templates and generate answers. For our purpose, we use existing  NLP task annotations  from the [i2b2 Challenge datasets][i2b2-datasets]. We refer the reader to the paper to get a more detailed overview of the generation framework.
 
@@ -53,11 +53,14 @@ cd emrQA; pip install -r requirements.txt
 
 ## emrQA Generation
 
-Run `python main.py` to generate the question-answers pairs in a json format and the question-logical form pairs in a csv format. By default the script creates an `output\` directory and stores all the generated files. You can access the combined question-answer dataset as `data.json` and  question-logical form data as `data.csv`. You can also access the intermediate datasets generated per every i2b2 challenge (e.g. `medications-qa.json` and `medication-ql.csv` generated from the 2009 medications challenge annotations). 
+Run `python main.py` to generate the question-answers pairs in a json format and the question-logical form pairs in a csv format. The input to these scripts is a csv file (`templates-all.csv`) located in `templates\` directory. By default the script creates an `output\` directory to store all the generated files. You can access the combined question-answer dataset as `data.json` and  question-logical form data as `data-ql.csv`. You can also access the intermediate datasets generated per every i2b2 challenge (e.g. `medications-qa.json` and `medication-ql.csv` generated from the 2009 medications challenge annotations). 
+
 
 A thorough discussion of the output format of these files is presented below.
 
-#### Question-Answer (JSON) Format
+#### Input: Templates (CSV) Format
+
+#### Output: Question-Answer (JSON) Format
 
 The json files in `output\` directory have the following format:
 
@@ -105,15 +108,27 @@ To generate the data in the SQUAD format (input format for the [DrQA][drqa] base
 ```bash
 python generation/combine_data/squad_format.py --output_dir output/
 ```
-#### Question-Logical Form (CSV) Format
+#### Output: Question-Logical Form (CSV) Format
 
 Each row in the csv file has the following format,
 
 ```
-"question"	"logical-form"	"question-template"	"logical-form-template"	 
+"question"  \t  "logical-form"  \t  "question-template"  \t  "logical-form-template"
 ```
 
 ## emrQA Analysis
+
+#### Basic statistics
+
+```bash
+python evaluation/analysis.py --output_dir output/
+```
+
+#### Paraphrase analysis
+
+
+#### Logical form template analysis
+
 
 ## Baselines
 
