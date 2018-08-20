@@ -60,6 +60,25 @@ A thorough discussion of the output format of these files is presented below.
 
 #### Input: Templates (CSV) Format
 
+Each row in the csv file has the following format:
+
+```
+"dataset"  \t  "question templates"  \t  "logical for templates"  \t  "answer type" \t "sub-answer-type"
+```
+
+A brief explantion how they are used in the scripts,
+
+```
+dataset: The i2b2 challenge dataset annotations to be used for the templates. This field should be one of the following values, medications, relations, risk, smoking, obesity.
+ 
+question templates: All the question paraphrase templates are provided as a string seperated by ##.
+
+logical form templates: The logical form template exper annotated for the question templates.
+
+answer type: 
+
+sub-answer-type:
+```
 #### Output: Question-Answer (JSON) Format
 
 The json files in `output\` directory have the following format:
