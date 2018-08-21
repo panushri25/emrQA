@@ -147,6 +147,7 @@ if __name__ == '__main__':
     print("Percentage with one evidences",number_of_answers_per_question[1]*100.0/total_question)
     print("range in number of evidences",min(number_of_answers_per_question.keys()),max(number_of_answers_per_question.keys()))
     print("total number of classes in obesity and smoking datasets", num_classes)
+
     ################# more stats ignore for now ######################
 
     # indefinite_evidence_type = []
