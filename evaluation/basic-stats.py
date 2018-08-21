@@ -11,7 +11,7 @@ import random
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--output_dir', default='output/', help='Directory to store the output')
+parser.add_argument('--output_dir', default='/home/anusri/Desktop/emrQA/output/', help='Directory to store the output')
 
 args = parser.parse_args()
 
@@ -52,7 +52,8 @@ if __name__ == '__main__':
 
     total_clinical_notes = 0
     number_of_answers_per_question = {}
-
+    num_classes = 0.0
+    classes = []
     total_evidences = []
 
 
@@ -77,7 +78,9 @@ if __name__ == '__main__':
 
                 for answer in questions["answers"]:
 
-                    if dataset["title"] == "obesity" or dataset["title"] == "smoking":
+                    if dataset["title"] in ["obesity", "smoking"] :
+                        #print(answer["text"])
+                        classes.append(answer["text"])
                         continue
                         #for txt in answer["text"]:
                         #    if txt not in all_answers:
@@ -86,19 +89,8 @@ if __name__ == '__main__':
                         if answer["answer_start"][0] != "":
                             if answer["answer_start"] not in all_answers:
                                 all_answers.append(answer["answer_start"]) ## all answers
-
-                                if dataset["title"] == "risk-dataset":
-                                    index = int(answer["answer_start"][0])
-                                    text = "\n".join(note["context"])
-                                    evidences.append(text[index])
-                                else:
-                                    index = int(answer["answer_start"][0]) - 1
-                                    evidences.append(note["context"][index])
-                        else:
-                            if answer["evidence_start"] not in all_answers:
-                                all_answers.append(answer["evidence_start"])  ## all answers
-                                index = int(answer["evidence_start"][0]) - 1
-                                evidences.append(note["context"][index])
+                                #print(questions["question"][0], answer["answer_start"],answer["evidence"])
+                                evidences.append(answer["evidence"])
 
                 total_evidences.extend(evidences)
 
@@ -141,7 +133,6 @@ if __name__ == '__main__':
     print("Average Number  Of questions per note", totals/total_clinical_notes)
     print("Average number of question types per note", total_question/total_clinical_notes)
 
-
     ## Average number of evidences per question ##
 
     total__num_answers = 0
@@ -151,10 +142,11 @@ if __name__ == '__main__':
         else:
             total__num_answers += value*number_of_answers_per_question[value]
 
+    num_classes = len(set(classes))
     print("Average number of evidences", float(total__num_answers) / total_question)
     print("Percentage with one evidences",number_of_answers_per_question[1]*100.0/total_question)
     print("range in number of evidences",min(number_of_answers_per_question.keys()),max(number_of_answers_per_question.keys()))
-
+    print("total number of classes in obesity and smoking datasets", num_classes)
     ################# more stats ignore for now ######################
 
     # indefinite_evidence_type = []
