@@ -1,5 +1,5 @@
 # emrQA: A Large Corpus for Question Answering on Electronic Medical Records
-**                  (The page and codes are still under construction. Please check back in October.  )                               **
+                  ## The page and codes are still under construction. Please check back in October.
 
 - This repo contains code for the paper
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
