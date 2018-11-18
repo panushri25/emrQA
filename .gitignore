@@ -6,6 +6,7 @@
 
 # Directories #
 output
+baselines
 
 # Packages #
 *.gz
