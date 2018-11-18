@@ -161,7 +161,6 @@ To run the scripts that filter logical form templates with specific properties,
 python evaluation/template-analysis.py --templates_dir templates/
 ```
 
-## Baselines
 
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
 [anusri-home]: https://www.linkedin.com/in/anusri-pampari-594bb5126/
