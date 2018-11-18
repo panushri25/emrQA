@@ -29,8 +29,8 @@ def scoring_method(qtuple,method):
 
 if __name__=="__main__":
 
-    #method = "blue_score"
-    method = "jaccard_score"
+    method = "blue_score"
+    #method = "jaccard_score"
     unique_logical_forms = []
     total_questions = []
     total_scores = []

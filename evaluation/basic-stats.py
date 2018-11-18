@@ -59,6 +59,8 @@ if __name__ == '__main__':
 
     for dataset in datasets["data"]:
 
+    
+
         print("Processing dataset",dataset["title"])
 
         for note in dataset["paragraphs"]:
@@ -130,7 +132,7 @@ if __name__ == '__main__':
 
     ## Average number of questions per note ##
 
-    print("Average Number  Of questions per note", totals/total_clinical_notes)
+    print("Average Number of questions per note", totals/total_clinical_notes)
     print("Average number of question types per note", total_question/total_clinical_notes)
 
     ## Average number of evidences per question ##
