@@ -1412,6 +1412,7 @@ class RiskFileAnalysis():
             [PatientNotes, RecordDates, Disease_note] = self.RiskAnnotationsPerNote[Noteid]
             # PatientNote = "\n".join(PatientNotes)
             PatientNote = ""
+            print(len(PatientNotes))
             for note in PatientNotes:
                 PatientNote += note + "\n"
             offset_notes = [0]
@@ -1471,9 +1472,10 @@ class RiskFileAnalysis():
             if len(values[2]) == 0:
 
                 paraphrase_questions = values[0]
-                unique_tup = list(set(zip(paraphrase_questions, question_list)))
+                unique_tup = list(set(paraphrase_questions))
+                #unique_tup = list(set(zip(paraphrase_questions, question_list)))
                 for qidx in range(len(unique_tup)):
-                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_orginal])
+                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [values[1]] + [unique_tup[qidx][1]] + [logical_form_orginal])
             else:
 
                 '''
@@ -1496,9 +1498,13 @@ class RiskFileAnalysis():
                 '''
 
                 paraphrase_questions = values[0]
-                unique_tup = list(set(zip(paraphrase_questions, question_list)))
+                unique_tup = list(set(paraphrase_questions))
+                #unique_tup = list(set(zip(paraphrase_questions, question_list)))
+                #print("unique_tup",unique_tup)
                 for qidx in range(len(unique_tup)):
-                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_orginal])
+                    #self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form] + [unique_tup[qidx][1]] + [logical_form_orginal])
+                    #print(unique_tup[qidx][0])
+                    self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [values[1]] + [unique_tup[qidx][1]] + [logical_form_orginal])
 
                 if set(list(zip(*values[0])[0])) not in self.unique_questions:
 
@@ -1525,7 +1531,6 @@ class RiskFileAnalysis():
 
     def MakeAnswers(self,answertype,types_to_replace,question_list,logical_form, Disease_time_progression, Record_dates,Noteid,offset_notes):
         QLA = []
-        paraphrase_questions = []
         non_uniq = []
         logical_form_orginal = logical_form
         if answertype == "none":
@@ -1533,9 +1538,10 @@ class RiskFileAnalysis():
 
             ################# Generate only Question Logical Forms ##################################
             for value in annotations:
-
+                #print(value)
                 logical_form_template = logical_form
                 new_question_list = []
+                paraphrase_questions = []
                 for question in question_list:
                     done = []
                     idx = 0
@@ -1555,6 +1561,7 @@ class RiskFileAnalysis():
                         done.append(types)
                         idx += 1
                     paraphrase_questions.append(question)
+                    #print(question)
                     if question not in new_question_list:
                         new_question_list.append(question)
 
@@ -1568,10 +1575,11 @@ class RiskFileAnalysis():
                     done.append(types)
                     logical_form_template = logical_form_template.replace("|" + types + "|", value[idx])
                     idx += 1
-
+                #print(logical_form_template)
                 unique_tup = list(set(zip(paraphrase_questions, question_list)))
 
                 for qidx in range(len(unique_tup)):
+                    #print(paraphrase_questions[0],logical_form_template)
                     self.filewriter_forlform.writerow([unique_tup[qidx][0]] + [logical_form_template] + [unique_tup[qidx][1]] + [logical_form_orginal])
             return QLA
 
