@@ -167,6 +167,10 @@ def MakeJSONOut(obesity_data,json_out,Patient):
                 for temp in [Y_class, N_class, U_class]:
                     jdx += 1
                     for problem in temp:
+                        
+                        #if problem.lower() != "obesity":
+                        #    continue
+
                         orginal_lform = lform
                         question_lits = question.replace("|problem|",problem).split("##")
                         lform_new = lform.replace("|problem|", problem)
