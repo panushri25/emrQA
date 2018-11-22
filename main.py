@@ -70,10 +70,10 @@ cmd = "{python} generation/i2b2_smoking/smoking-answers.py --i2b2_dir={i2b2_dir}
 print(cmd)
 check_call(cmd, shell=True)
 
+
 cmd = "{python} generation/i2b2_obesity/obesity-answers.py --i2b2_dir={i2b2_dir} --templates_dir={templates_dir} --output_dir={output_dir}".format(python=PYTHON, i2b2_dir=i2b2_obesity_challenge_directory, templates_dir=templates_directory, output_dir=output_directory)
 print(cmd)
 check_call(cmd, shell=True)
-
 
 ##################  combine all the output files and generate the output in normal format ####################
 
@@ -81,7 +81,6 @@ cmd = "{python} generation/combine_data/combine_answers.py --output_dir={output_
 print(cmd)
 check_call(cmd, shell=True)
 
-'''
 #####################  convert normal output to squad format ##################################
 
 
@@ -90,4 +89,3 @@ check_call(cmd, shell=True)
 cmd = "{python}  evaluation/analysis.py".format(python=PYTHON)
 print(cmd)
 check_call(cmd, shell=True)
-'''
