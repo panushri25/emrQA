@@ -21,6 +21,7 @@ obesity = json.load(open(os.path.join(args.output_dir,"obesity-qa.json")))
 ######################################################## CODE #########################################################################
 
 data = [medications, relations, risk, smoking, obesity]
+#data = [relations]
 data_out = {"data": data}
 json_out = os.path.join(args.output_dir,"data.json")
 with open(json_out, 'w') as outfile:
@@ -85,7 +86,7 @@ risk = os.path.join(args.output_dir,"risk-ql.csv")
 smoking = os.path.join(args.output_dir,"smoking-ql.csv")
 obesity = os.path.join(args.output_dir,"obesity-ql.csv")
 
-data = data = [medications, relations, risk, smoking, obesity]
+data = [medications, relations, risk, smoking, obesity]
 
 unique = set()
 
