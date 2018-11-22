@@ -474,7 +474,7 @@ class GenerateQA():
             answer_line.extend(question_list)
             result_num.extend(line_num)
             #result_token.extend(line_token)
-            result_token.extend("")
+            result_token = [""] * len(question_list)
             list_nar.extend(quest_list_nar)
         elif answertype == ["problem"]:
             for listr in self.map_meds_to_reasons[med_annotations["medication"][0]]:
