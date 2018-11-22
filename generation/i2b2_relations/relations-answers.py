@@ -701,7 +701,8 @@ class GenerateRelationsQuestions():
                             ans_list = []
                             for idx in range(len(answer)):
                                 #print(answer[idx], result_num[idx], result_token[idx])
-                                val = {"answer_start": [result_num[idx], result_token[idx]], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": result_num[idx]}
+                                #val = {"answer_start": [result_num[idx], result_token[idx]], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": result_num[idx]}
+                                val = {"answer_start": [result_num[idx], ""], "text": "", "evidence": answer_line[idx], "evidence_start": result_num[idx]}
                                 if val not in ans_list:
                                     ans_list.append(val)
 
@@ -847,10 +848,12 @@ class GenerateRelationsQuestions():
 
         ######################## rules for test answers ########################
         if answertype == "yes/no" or answertype == "abnormal" or answertype == "yes":
-            answer = ["yes"]* len(question_lines)
+            #answer = ["yes"]* len(question_lines)
+            answer = [""] * len(question_lines)
             answer_line.extend(question_lines)
             result_start_line.extend(question_start_line)
-            result_start_token.extend(question_start_token)
+            #result_start_token.extend(question_start_token)
+            result_start_token =  [""] * len(question_lines)
         elif answertype == "tests_investigated":
             tests = self.map_tests_to_problem_investigated[Noteid][concept_cluster_2]
             for test in tests:
@@ -895,10 +898,12 @@ class GenerateRelationsQuestions():
                     result_start_line.append(int(problem[3]))
                     result_start_token.append(int(problem[4]))
             except:
-                answer = ["no"]*len(question_lines)
-            answer_line.extend(question_lines)
-            result_start_line.extend(question_start_line)
-            result_start_token.extend(question_start_token)
+                #answer = ["no"]*len(question_lines)
+                answer = [""] * len(question_lines)
+                answer_line.extend(question_lines)
+                result_start_line.extend(question_start_line)
+                #result_start_token.extend(question_start_token)
+                result_start_token = [""] * len(question_lines)
 
         elif answertype == "problems_investigated":
             problems = self.map_problems_to_test_investigated[Noteid][concept_cluster_1]
@@ -959,10 +964,12 @@ class GenerateRelationsQuestions():
                     result_start_line.append(int(event[3]))
                     result_start_token.append(int(event[4]))
         elif answertype == "no":
-            answer = ["no"]*len(question_lines)
+            #answer = ["no"]*len(question_lines)
+            answer = [""] * len(question_lines)
             answer_line.extend(question_lines)
             result_start_line.extend(question_start_line)
-            result_start_token.extend(question_start_token)
+            #result_start_token.extend(question_start_token)
+            result_start_token = [""] * len(question_lines)
         elif answertype == "problems_check_conducted":
             events = self.map_problems_to_treatment[Noteid][concept_cluster_1]
 
