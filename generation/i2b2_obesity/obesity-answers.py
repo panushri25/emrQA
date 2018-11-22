@@ -19,6 +19,7 @@ file_names = ["obesity_standoff_annotations_test.xml","obesity_standoff_annotati
 note_names = ["obesity_patient_records_test.xml", "obesity_patient_records_training.xml"]
 
 ql_output = os.path.join(args.output_dir,"obesity-ql.csv")
+#print(ql_output)
 qa_json_out = os.path.join(args.output_dir,"obesity-qa.json")
 
 ######################################################## CODE #########################################################################
@@ -167,7 +168,7 @@ def MakeJSONOut(obesity_data,json_out,Patient):
                 for temp in [Y_class, N_class, U_class]:
                     jdx += 1
                     for problem in temp:
-                        
+
                         #if problem.lower() != "obesity":
                         #    continue
 
