@@ -3,8 +3,9 @@
 
 - This repo contains code for the paper
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
-emrQA: A Large Corpus for Question Answering on Electronic Medical Records,  
+[emrQA: A Large Corpus for Question Answering on Electronic Medical Records][paper-link],  
 In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, Brussels, Belgium.
+- General queries/thoughts have been addressed in the dicssuion section below.
 - Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu)  for suggestions and comments.
 
 ## Quick Links
@@ -14,6 +15,7 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 - [Data Generation](#emrqa-generation)
 - [Data Analysis](#emrqa-analysis)
 - [Baselines](#baselines)
+- [Discussions](#discussions)
 
 ##  Question Answering on Electronic Medical Records (EMR)
 
@@ -42,7 +44,7 @@ Some statistics of the current version of the generated data:
 
 ## Requirements
 
-To generate emrQA, first download the NLP Datasets from the [i2b2 Challenges][i2b2-datasets] accessible by everyone subject to a license agreement. You will need to download and extract all the datasets corresponding to given a challenge (e.g 2009 Medications Challenge) at a specfic folder location (the containe of the folder location are eloborated below for your reference). Once completed, update the path location in `main.py`.  In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
+To generate emrQA, first download the NLP Datasets from the [i2b2 Challenges][i2b2-datasets] accessible by everyone subject to a license agreement. You will need to download and extract all the datasets corresponding to given a challenge (e.g 2009 Medications Challenge) at a specfic folder location (the contains of the folder location are eloborated below in the discussion section for your reference). Once completed, update the path location in `main.py`.  In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
 
 The generation scrpits in the repo require Python 2.7. Run the following commands to clone the repository and install the requirements for emrQA:
 
@@ -50,6 +52,9 @@ The generation scrpits in the repo require Python 2.7. Run the following command
 git clone https://github.com/emrqa/emrQA.git
 cd emrQA; pip install -r requirements.txt
 ```
+
+### i2b2 directory structure 
+
 
 ## emrQA Generation
 
@@ -160,8 +165,30 @@ To run the scripts that filter logical form templates with specific properties,
 ```bash
 python evaluation/template-analysis.py --templates_dir templates/
 ```
+## Discussion
 
+##### i2b2 datasets directory structure
+
+The i2b2 challenge datasets used to generate the current emrQA version was downloaded in August, 2017. Since the structure of these i2b2 datasets itself could change, we thought it might be useful to discuss our i2b2  repository structure. 
+
+The scipts in this repository are used to parse the following i2b2 directory structure,
+
+```
+
+``` 
+
+
+##### The answer evidence is not a complete sentence. Why ?
+
+The annotations used from the i2b2 datasets (except heart disease risk) have both token span and line number annotations. Clinical notes in these datasets are split at the newline character and assigned a line number. Our evidence line is simply the line in the clinical note corresponsing to a particular i2b2 annotation's line number. Since i2b2 heart disease risk annotations has only token span annotations without any  line number annotations, we break the clinical notes at newline character and the line containing the token span is considered as our evidence line. 
+ 
+- When clinical notes are split at newline character, start/stop of the evidence line may not overlap with a complete sentence in a clinical note. To avoid this we tried to use a sentence splitter instead of newline characters to determine our evidence lines. But existing sentence splitter's such as NLTK sentence splitter do even worse in breaking a clinical notes sentence because of its noisy, ungrammatical structure.
+- Clinical notes are noisy, so some of the evidence lines may not have complete context or may not be grammatically correct.
 
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
 [anusri-home]: https://www.linkedin.com/in/anusri-pampari-594bb5126/
 [drqa]: https://github.com/facebookresearch/DrQA
+[paper-link]: http://aclweb.org/anthology/D18-1258
+
+
+
