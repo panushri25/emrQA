@@ -86,6 +86,8 @@ check_call(cmd, shell=True)
 
 ######################### basic analysis of the dataset #######################################
 
+'''
 cmd = "{python}  evaluation/analysis.py".format(python=PYTHON)
 print(cmd)
 check_call(cmd, shell=True)
+'''
