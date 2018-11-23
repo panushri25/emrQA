@@ -5,7 +5,7 @@
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
 [emrQA: A Large Corpus for Question Answering on Electronic Medical Records][paper-link],  
 In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, Brussels, Belgium.
-- General queries/thoughts have been addressed in the dicssuion section below.
+- General queries/thoughts have been addressed in the discussion section below.
 - Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu)  for suggestions and comments.
 
 ## Quick Links
@@ -15,7 +15,7 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 - [Data Generation](#emrqa-generation)
 - [Data Analysis](#emrqa-analysis)
 - [Baselines](#baselines)
-- [Discussions](#discussions)
+- [Discussion](#discussion)
 
 ##  Question Answering on Electronic Medical Records (EMR)
 
@@ -182,7 +182,7 @@ The scipts in this repository are used to parse the following i2b2 directory str
 
 The annotations used from the i2b2 datasets (except heart disease risk) have both token span and line number annotations. Clinical notes in these datasets are split at the newline character and assigned a line number. Our evidence line is simply the line in the clinical note corresponsing to a particular i2b2 annotation's line number. Since i2b2 heart disease risk annotations has only token span annotations without any  line number annotations, we break the clinical notes at newline character and the line containing the token span is considered as our evidence line. 
  
-- When clinical notes are split at newline character, start/stop of the evidence line may not overlap with a complete sentence in a clinical note. To avoid this we tried to use a sentence splitter instead of newline characters to determine our evidence lines. But existing sentence splitter's such as NLTK sentence splitter do even worse in breaking a clinical notes sentence because of its noisy, ungrammatical structure.
+- When clinical notes are split at newline character, start/stop of the evidence line may not overlap with a complete sentence in a clinical note. To avoid this we tried to use a sentence splitter instead of newline character to determine our evidence lines. But existing sentence splitter's such as NLTK sentence splitter do even worse in breaking a clinical notes sentence because of its noisy, ungrammatical structure.
 - Clinical notes are noisy, so some of the evidence lines may not have complete context or may not be grammatically correct.
 
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
