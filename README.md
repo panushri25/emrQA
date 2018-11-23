@@ -53,8 +53,6 @@ git clone https://github.com/emrqa/emrQA.git
 cd emrQA; pip install -r requirements.txt
 ```
 
-### i2b2 directory structure 
-
 
 ## emrQA Generation
 
@@ -174,6 +172,48 @@ The i2b2 challenge datasets used to generate the current emrQA version was downl
 The scipts in this repository are used to parse the following i2b2 directory structure,
 
 ```
+
+├── "i2b2 (download the datsets in single folder)"
+       ├── "smoking" (download 2006 smoking challenge datasets here)
+       │       │ 
+       │       ├── "smokers_surrogate_test_all_groundtruth_version2.xml"
+       │       └── "smokers_surrogate_train_all_version2.xml"
+       │ 
+       ├── "obesity" (download 2008 obesity challenge datasets here)
+       │       │ 
+       │       ├── "obesity_standoff_annotations_test.xml"
+       │       ├── "obesity_standoff_annotations_training.xml"
+       │       ├── "obesity_patient_records_test.xml"
+       │       └── "obesity_patient_records_training.xml"
+       │       
+       ├── "medication" (download 2009 medication challenge datasets here)
+       │       │ 
+       │       ├── "train.test.released.8.17.09/" (folder containing all clinical notes)
+       │       ├── "annotations_ground_truth/converted.noduplicates.sorted/" (folder path with medication annotations
+       │       └── "training.ground.truth/" (folder path with medication annotations)
+       │       
+       ├── "relations" (download 2010 relation challenge datasets here)
+       │       │ 
+       │       ├── "concept_assertion_relation_training_data/partners/txt/" (folder path containing clinical notes)
+       │       ├── "concept_assertion_relation_training_data/beth/txt/" (folder path containing clinical notes)
+       │       ├── "test_data/txt/" (folder path containing clinical notes)
+       │       ├── "concept_assertion_relation_training_data/partners/rel/" (folder path with relation annotations)
+       │       ├── "concept_assertion_relation_training_data/beth/rel/" (folder path with relation annotations)
+       │       ├── "test_data/rel/" (folder path with relation annotations)
+       │       ├── "concept_assertion_relation_training_data/partners/ast/" (folder path with assertion annotations)
+       │       ├── "concept_assertion_relation_training_data/beth/ast/" (folder path with assertion annotations)
+       │       └── "test_data/ast/" (folder path with assertion annotations)
+       │       
+       ├── "coreference" (download 2011 coreference challenge datasets here)
+       │       │ 
+       │       ├── "Beth_Train"  (folder with the following subfolders "chains", "concepts", "docs", "pairs")
+       │       ├── "Partners_Train" (folder with the following subfolders "chains", "concepts", "docs", "pairs")
+       │       └── "i2b2_Test" (folder with "i2b2_Beth_Test" and "i2b2_Partners_Test" containing "chains" and "concepts" subfolders)
+       │       
+       └── "heart-disease-risk" (download 2014 heart disease risk factprs challenge datasets here)
+               │ 
+               └── "training-RiskFactors-Complete-Set1/" (folder path with files containing annotations and clinical notes)
+       
 
 ``` 
 
