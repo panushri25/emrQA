@@ -231,6 +231,19 @@ The annotations used from the i2b2 datasets (except heart disease risk) have bot
 - When clinical notes are split at newline character, start/stop of the evidence line may not overlap with a complete sentence in a clinical note. To avoid this we tried to use a sentence splitter instead of newline character to determine our evidence lines. But existing sentence splitter's such as NLTK sentence splitter do even worse in breaking a clinical notes sentence because of its noisy, ungrammatical structure.
 - Clinical notes are noisy, so some of the evidence lines may not have complete context or may not be grammatically correct.
 
+##### I see a bug in the dataset, What should I do ?
+
+Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu) for any bugs. The more details you provide me about the bug, the easier and hence quicker you will make it for me to debug it. You can help me with the following information:
+
+```
+i2b2 dataset name
+example note_id, how many notes are affected by this bug if possible
+is there a trend in the type of questions (particular question template) where this bug occurs
+An example instance of the bug indetail.
+```
+
+Opening a public issue, might go against the i2b2 license agreement. So it is important you mail me the bug. Thank you for understanding. I will try my best to reply at the earliest.
+
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
 [anusri-home]: https://www.linkedin.com/in/anusri-pampari-594bb5126/
 [drqa]: https://github.com/facebookresearch/DrQA
