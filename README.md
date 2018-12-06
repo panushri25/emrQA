@@ -11,7 +11,7 @@ Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,
 [emrQA: A Large Corpus for Question Answering on Electronic Medical Records][paper-link],  
 In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, Brussels, Belgium.
 - General queries/thoughts have been addressed in the discussion section below.
-- Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu)  for suggestions and comments.
+- Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu)  for suggestions and comments. More instructions about reporting bugs detailed below.
 
 ## Quick Links
 
@@ -21,7 +21,7 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 - [Data Analysis](#emrqa-analysis)
 - [Baselines](#baselines)
 - [Discussion](#discussion)
-
+- [Report a bug](#dataset-bugs)
 ##  Question Answering on Electronic Medical Records (EMR)
 
 In this work, we address the lack of any publicly available EMR Question Answering (QA) corpus by creating a large-scale dataset, emrQA, using a novel semi-automated generation framework that allows for minimal expert involvement and re-purposes existing annotations available for other clinical NLP tasks. To briefly summarize the  generation process: (1) we collect questions from experts (2) convert them to templates by replacing entities with placeholders (3) expert annotate the templates with logical form templates and then (4) use annotations from existing NLP tasks (based on information in logical forms) to populate placeholders in templates and generate answers. For our purpose, we use existing  NLP task annotations  from the [i2b2 Challenge datasets][i2b2-datasets]. We refer the reader to the paper to get a more detailed overview of the generation framework.
@@ -230,6 +230,8 @@ The annotations used from the i2b2 datasets (except heart disease risk) have bot
  
 - When clinical notes are split at newline character, start/stop of the evidence line may not overlap with a complete sentence in a clinical note. To avoid this we tried to use a sentence splitter instead of newline character to determine our evidence lines. But existing sentence splitter's such as NLTK sentence splitter do even worse in breaking a clinical notes sentence because of its noisy, ungrammatical structure.
 - Clinical notes are noisy, so some of the evidence lines may not have complete context or may not be grammatically correct.
+
+## Dataset Bugs
 
 ##### I see a bug in the dataset, What should I do ?
 
