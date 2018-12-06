@@ -253,7 +253,7 @@ class GenerateRelationsQuestions():
                     ### Common Noun Check  End###
                     '''
                     val1 = (t1, type[relate][0], val1[1], val1[2], val1[3])
-                    val2 = (t2, type[relate][1], val2[1], val2[2], val1[3])
+                    val2 = (t2, type[relate][1], val2[1], val2[2], val2[3])
 
                     if (val1, val2) not in Relations[relate]:
                         Relations[relate].append((val1, val2))
@@ -493,7 +493,7 @@ class GenerateRelationsQuestions():
 
                 questions_list = question.strip().split("##")
 
-                ## fixed a bug, intially ot included ##
+                ## fixed a bug, intially not included ##
                 answer_out = self.HandleAssertionQA(Noteid, types_to_replace, questions_list, logical_form_template, Coreferences, answertype) ## fixed bug, intially was not including assertations data
 
             else:
@@ -554,10 +554,13 @@ class GenerateRelationsQuestions():
                                 start_line = answer_start_line[idx]
                                 start_token = answer_start_token[idx]
 
-                                val = {"answer_start": [start_line, start_token], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": answer_start_token[idx]}
 
+                                #if answer[idx] == "" and start_token != "":
+                                #    print(paraphrase_questions)
+                                val = {"answer_start": [start_line, start_token], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": start_line}
                                 if val not in ans_list:
                                     ans_list.append(val)
+
 
                                 ## ""evidence"" in the dictionary above is currently just the answer line in the note. You can also consider question line and answer line from note as evidence in that uncomment below code and use it accordingly ##
 
