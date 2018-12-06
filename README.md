@@ -1,5 +1,10 @@
 # emrQA: A Large Corpus for Question Answering on Electronic Medical Records
-                  The page and codes are still under construction. Please check back in December.
+                  The page and codes are still under construction. Please check back in December. 
+                  We are excited to announce that this data will now be hosted directly under the 
+                  i2b2 license !! So you can directly download the dataset from the i2b2 website 
+                  instead of generating it from the scripts. We are setting this up for you, kindly
+                  stay tuned. Believe me it takes some iterations to draw consensus on a usable format. 
+                  But we are almost there. :) 
 
 - This repo contains code for the paper
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
@@ -37,6 +42,7 @@ Some statistics of the current version of the generated data:
 
 **UPDATES:**
 ```
+29th Novemebr 2018: We are excited to announce that this data will now be hosted directly under the i2b2 license !! So you can directly download the dataset from the i2b2 website instead of generating it from the scripts. We are setting this up, kindly stay tuned. Expected date of setup: Mid december !
 27th August 2018: Extended the i2b2 obesity question-answer pairs to obesity comorbidities. 
 20th August 2018: Added QA pairs generated from i2b2 relations (assertions). 
 27th Jun 2018: Dataset as decribed in the paper. 
