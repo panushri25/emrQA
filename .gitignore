@@ -9,6 +9,7 @@ temp_risk.txt
 # Directories #
 output
 baselines
+i2b2
 .idea
 
 # Packages #

@@ -7,12 +7,12 @@ PYTHON = sys.executable
 
 #################################### set the full file paths ###############################################
 
-i2b2_relations_challenge_directory = "/home/anusri/Desktop/IBM/i2b2/relations/"
-i2b2_medications_challenge_directory = "/home/anusri/Desktop/IBM/i2b2/medication/"
-i2b2_heart_disease_risk_challenge_directory = "/home/anusri/Desktop/IBM/i2b2/heart-disease-risk/"
-i2b2_obesity_challenge_directory = "/home/anusri/Desktop/IBM/i2b2/obesity/"
-i2b2_smoking_challenge_directory = "/home/anusri/Desktop/IBM/i2b2/smoking/"
-i2b2_coreference_challeneg_directory = "/home/anusri/Desktop/IBM/i2b2/coreference"
+i2b2_relations_challenge_directory = "i2b2/relations/"
+i2b2_medications_challenge_directory = "i2b2/medication/"
+i2b2_heart_disease_risk_challenge_directory = "i2b2/heart-disease-risk/"
+i2b2_obesity_challenge_directory = "i2b2/obesity/"
+i2b2_smoking_challenge_directory = "i2b2/smoking/"
+i2b2_coreference_challeneg_directory = "i2b2/coreference"
 
 templates_directory = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
 
