@@ -164,6 +164,7 @@ class RiskFileAnalysis():
                 if start >= indices[tup_id][0] and start <= indices[tup_id][1] and flag_start == 0 and end <= \
                         indices[tup_id][1]:
                     #start_evidence = tup_id
+                    start_evidence = indices[tup_id][0]
                     flag_start = 1
                     inline_text = indices[tup_id][2]
                     break
@@ -172,14 +173,16 @@ class RiskFileAnalysis():
                     start_evidence = indices[tup_id][0]
                     flag_start = 1
                     inline_text = indices[tup_id][2]
+                    continue
 
                 if end <= indices[tup_id][1] and flag_start == 1:
                     end_evidence = indices[tup_id][1]
                     inline_text += "\n" + indices[tup_id][2]
                     break
 
-                #if flag_start == 1:
-                #    inline_text += "\n" + indices[tup_id][2]
+                if flag_start == 1:
+                    inline_text += "\n" + indices[tup_id][2]
+                    #print(inline_text)
 
             start_inline_text = start_evidence
             Record_Date = (text, inline_text, start_inline_text, start)
@@ -267,14 +270,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
                     if (text, inline_text, start_inline_text, start) not in Dictionary[disease]["mention"]:
@@ -302,14 +306,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -375,14 +380,15 @@ class RiskFileAnalysis():
                     start_evidence = indices[tup_id][0]
                     flag_start = 1
                     inline_text = indices[tup_id][2]
+                    continue
 
                 if end <= indices[tup_id][1] and flag_start == 1:
                     end_evidence = indices[tup_id][1]
                     inline_text += "\n" + indices[tup_id][2]
                     break
 
-                #if flag_start == 1:
-                 #   inline_text += "\n" + indices[tup_id][2]
+                if flag_start == 1:
+                   inline_text += "\n" + indices[tup_id][2]
 
             start_inline_text = start_evidence
             Record_Date = (text, inline_text, start_inline_text, start)
@@ -471,14 +477,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
                     if (text, inline_text, start_inline_text, start) not in Dictionary[disease]["mention"]:
@@ -506,14 +513,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                         #   inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -540,14 +548,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -575,14 +584,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -649,15 +659,15 @@ class RiskFileAnalysis():
                     start_evidence = indices[tup_id][0]
                     flag_start = 1
                     inline_text = indices[tup_id][2]
+                    continue
 
                 if end <= indices[tup_id][1] and flag_start == 1:
                     end_evidence = indices[tup_id][1]
                     inline_text += "\n" + indices[tup_id][2]
                     break
 
-                #if flag_start == 1:
-                #    inline_text += "\n" + indices[tup_id][2]
-
+                if flag_start == 1:
+                    inline_text += "\n" + indices[tup_id][2]
             start_inline_text = start_evidence
             Record_Date = (text, inline_text, start_inline_text, start)
 
@@ -747,15 +757,15 @@ class RiskFileAnalysis():
                                 start_evidence = indices[tup_id][0]
                                 flag_start = 1
                                 inline_text = indices[tup_id][2]
-
+                                continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
 
                     start_inline_text = start_evidence
@@ -785,14 +795,14 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
-
+                            continue
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -819,14 +829,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                         #   inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -896,14 +907,15 @@ class RiskFileAnalysis():
                     start_evidence = indices[tup_id][0]
                     flag_start = 1
                     inline_text = indices[tup_id][2]
+                    continue
 
                 if end <= indices[tup_id][1] and flag_start == 1:
                     end_evidence = indices[tup_id][1]
                     inline_text += "\n" + indices[tup_id][2]
                     break
 
-                #if flag_start == 1:
-                #    inline_text += "\n" + indices[tup_id][2]
+                if flag_start == 1:
+                    inline_text += "\n" + indices[tup_id][2]
 
             start_inline_text = start_evidence
             Record_Date = (text, inline_text, start_inline_text, start)
@@ -989,14 +1001,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
                     if (text, inline_text, start_inline_text, start) not in Dictionary[disease]["mention"]:
@@ -1024,14 +1037,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                         #   inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -1058,14 +1072,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -1127,14 +1142,15 @@ class RiskFileAnalysis():
                     start_evidence = indices[tup_id][0]
                     flag_start = 1
                     inline_text = indices[tup_id][2]
+                    continue
 
                 if end <= indices[tup_id][1] and flag_start == 1:
                     end_evidence = indices[tup_id][1]
                     inline_text += "\n" + indices[tup_id][2]
                     break
 
-                #if flag_start == 1:
-                #    inline_text += "\n" + indices[tup_id][2]
+                if flag_start == 1:
+                    inline_text += "\n" + indices[tup_id][2]
 
             start_inline_text = start_evidence
             Record_Date = (text, inline_text, start_inline_text, start)
@@ -1218,14 +1234,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
                     if (text, inline_text, start_inline_text, start) not in Dictionary[disease]["mention"]:
@@ -1253,14 +1270,15 @@ class RiskFileAnalysis():
                             start_evidence = indices[tup_id][0]
                             flag_start = 1
                             inline_text = indices[tup_id][2]
+                            continue
 
                         if end <= indices[tup_id][1] and flag_start == 1:
                             end_evidence = indices[tup_id][1]
                             inline_text += "\n" + indices[tup_id][2]
                             break
 
-                        #if flag_start == 1:
-                        #    inline_text += "\n" + indices[tup_id][2]
+                        if flag_start == 1:
+                            inline_text += "\n" + indices[tup_id][2]
 
                     start_inline_text = start_evidence
 
@@ -1341,6 +1359,7 @@ class RiskFileAnalysis():
                         start_evidence = indices[tup_id][0]
                         flag_start = 1
                         inline_text = indices[tup_id][2]
+                        continue
 
                     if end <= indices[tup_id][1] and flag_start == 1:
                         end_evidence = indices[tup_id][1]
@@ -1416,9 +1435,9 @@ class RiskFileAnalysis():
             for note in PatientNotes:
                 PatientNote += note + "\n"
             offset_notes = [0]
-            #for note in PatientNotes[0:-1]:
-            #    new_offset = len(note)+1+offset_notes[-1]
-            #    offset_notes.append(new_offset)
+            for note in PatientNotes[0:-1]:
+                new_offset = len(note)+1+offset_notes[-1]
+                offset_notes.append(new_offset)
             #print(offset_notes)
 
             out_patient = {"note_id": Noteid, "context": PatientNote.split("\n"), "qas": []}
@@ -1517,9 +1536,11 @@ class RiskFileAnalysis():
 
                         val = {"answer_start": [start_inline_text, start], "text": text, "evidence": inline_text, "evidence_start": start_inline_text}
                         #print("idx \n")
-                        #print(val["evidence"])
-                        #print(PatientNote[int(val["evidence_start"]):int(val["evidence_start"]) + len(val["evidence"])])
+
                         if val not in ans_list:
+                            #if val["evidence"] != PatientNote[int(val["evidence_start"]):int(val["evidence_start"]) + len(val["evidence"])]:
+                            #    print(val["evidence"])
+                            #    print("line in note",PatientNote[int(val["evidence_start"]):int(val["evidence_start"]) + len(val["evidence"])])
                             ans_list.append(val)  # evidence will have q_line_answer_line
 
                     answer_temp = {"answers": ans_list, "id": [values[0], logical_form_orginal],"question": list(list(zip(*values[0])[0]))}
