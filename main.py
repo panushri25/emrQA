@@ -51,6 +51,8 @@ if flag == 0:
 
 ################################### run the generation scripts #######################################
 
+
+
 cmd = "{python} generation/i2b2_medications/medication-answers.py --i2b2_dir={i2b2_dir} --templates_dir={templates_dir} --output_dir={output_dir}".format(python=PYTHON, i2b2_dir=i2b2_medications_challenge_directory, templates_dir=templates_directory, output_dir=output_directory)
 print(cmd)
 check_call(cmd, shell=True)
