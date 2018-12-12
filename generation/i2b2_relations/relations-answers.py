@@ -217,7 +217,7 @@ class GenerateRelationsQuestions():
                             end_line = out[1].split(":")[0]
                             end_token = out[1].split(":")[1]
 
-                        line_in_note += ",".join(PatientNote[int(start_line) - 1:int(end_line)])
+                        line_in_note += "".join(PatientNote[int(start_line) - 1:int(end_line)])
 
                         vals.append((annotation, line_in_note, start_line, start_token))
 
@@ -330,7 +330,7 @@ class GenerateRelationsQuestions():
                     end_token = out[1].split(":")[1]
                     end_token = out[1].split(":")[1]
 
-                line_in_note += ",".join(PatientNote[int(start_line) - 1:int(end_line)])
+                line_in_note += "".join(PatientNote[int(start_line) - 1:int(end_line)])
 
                 vals.append((annotation,line_in_note,start_line,start_token))
 
@@ -381,7 +381,7 @@ class GenerateRelationsQuestions():
                             end_line = out[1].split(":")[0]
                             end_token = out[1].split(":")[1]
 
-                        line_in_note += ",".join(PatientNote[int(start_line) - 1:int(end_line)])
+                        line_in_note += "".join(PatientNote[int(start_line) - 1:int(end_line)])
 
                     if annotation == None:
                         continue
