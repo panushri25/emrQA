@@ -118,7 +118,7 @@ class GenerateQA():
                             end_line = out[1].split(":")[0]
                             end_token = out[1].split(":")[1]
 
-                            line_in_note += ",".join(PatientNote[int(start_line) - 1:int(end_line)])
+                            line_in_note += "".join(PatientNote[int(start_line) - 1:int(end_line)])
 
                             # if int(end_line) > int(start_line):
                             #    print(type)
