@@ -14,7 +14,7 @@ i2b2_obesity_challenge_directory = "i2b2/obesity/"
 i2b2_smoking_challenge_directory = "i2b2/smoking/"
 i2b2_coreference_challeneg_directory = "i2b2/coreference"
 
-templates_directory = "/home/anusri/Desktop/emrQA/templates/templates-all.csv"
+templates_directory = "templates/templates-all.csv"
 
 #################################### make output directory if it does not already exist #########################
 
@@ -50,7 +50,6 @@ if flag == 0:
     ofile.close()
 
 ################################### run the generation scripts #######################################
-
 
 
 cmd = "{python} generation/i2b2_medications/medication-answers.py --i2b2_dir={i2b2_dir} --templates_dir={templates_dir} --output_dir={output_dir}".format(python=PYTHON, i2b2_dir=i2b2_medications_challenge_directory, templates_dir=templates_directory, output_dir=output_directory)
