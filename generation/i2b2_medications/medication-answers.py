@@ -296,6 +296,13 @@ class GenerateQA():
 
             if len(answer) != 0:
 
+                if answertype == ["medication", 'dosage']:
+                    entity_type = "complex"
+                elif answertype == ["yes"]:
+                    entity_type = "empty"
+                else:
+                    entity_type = "single"
+
                 unique_paras = set(paraphrase_questions)
                 if unique_paras not in self.unique_questions:  ## redundancy check: checking if these set of questions are unique for every clinical note ##
 
@@ -308,7 +315,7 @@ class GenerateQA():
                         start_token = result_token[idx]
 
                         val = {"answer_start": [start_line, start_token], "text": answer[idx],
-                               "evidence": answer_line[idx], "evidence_start": result_num[idx]}
+                               "evidence": answer_line[idx], "evidence_start": result_num[idx], "answer_entity_type": entity_type}
 
                         if val not in ans_list:
                             ans_list.append(val)
@@ -388,7 +395,8 @@ class GenerateQA():
 
             if med_annotations["dosage"][0] != "nm":
                 #if med_annotations["event"] == ""
-                self.map_meds_to_dosages[med_annotations["medication"][0]].append(med_annotations["dosage"]+med_annotations["list"])
+                if med_annotations["dosage"]+med_annotations["list"] not in self.map_meds_to_dosages[med_annotations["medication"][0]]:
+                    self.map_meds_to_dosages[med_annotations["medication"][0]].append(med_annotations["dosage"]+med_annotations["list"])
             if med_annotations["problem"][0] != "nm":
                 self.map_meds_to_reasons[med_annotations["medication"][0]].append(med_annotations["problem"]+med_annotations["list"])
             if med_annotations["problem"][0] != "nm":
@@ -509,17 +517,33 @@ class GenerateQA():
         elif answertype == ["medication", 'dosage']:
             meds = self.map_reasons_to_meds[med_annotations["problem"][0]]
             for med in meds:
-                dos = ",".join([x[0] for x in self.map_meds_to_dosages[med[0]]])
-                answer += ["( " + med[0] + ", " + dos + ")"]
-                #answer += [dos]
-                answer_line.append(med[1])
-                answer_line.extend([x[1] for x in self.map_meds_to_dosages[med[0]]])
-                result_num.extend([int(med[2])])
-                result_token.extend([int(med[3])])
-                result_num.extend([int(x[2]) for x in self.map_meds_to_dosages[med[0]]])
-                result_token.extend([int(x[3]) for x in self.map_meds_to_dosages[med[0]]])
-                list_nar.extend([x[3] for x in self.map_meds_to_dosages[med[0]]])
-                list_nar.append(med[3])
+                #dos = ",".join([x[0] for x in self.map_meds_to_dosages[med[0]]])
+                #answer += ["( " + med[0] + ", " + dos + ")"]
+
+                answer.append([med[0]])
+                answer_line.append([med[1]])
+                result_num.append([int(med[2])])
+                result_token.append([int(med[3])])
+                list_nar.append([med[3]])
+
+
+                for x in self.map_meds_to_dosages[med[0]]:
+                    #if x[1] not in answer_line[-1]:
+                    answer[-1].extend([x[0]])
+                    answer_line[-1].extend([x[1]])
+                    result_num[-1].extend([int(x[2])])
+                    result_token[-1].extend([int(x[3])])
+                    list_nar[-1].extend([x[4]])
+
+                #print("new medicine")
+                #print(answer[-1])
+                #print(result_num[-1])
+                #print(result_token[-1])
+                #print(answer_line[-1])
+                #result_num[-1].extend([int(x[2]) for x in self.map_meds_to_dosages[med[0]] if int(x[2]) not in result_num[-1]])
+                #result_token[-1].extend([int(x[3]) for x in self.map_meds_to_dosages[med[0]]])
+                #list_nar.extend([x[3] for x in self.map_meds_to_dosages[med[0]]])
+
         elif answertype == ["duration"]:
             for listr in self.map_meds_to_durations[med_annotations["medication"][0]]:
                 answer += [listr[0]]
