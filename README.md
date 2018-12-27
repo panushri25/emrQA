@@ -204,7 +204,14 @@ We combine all these ".txt" files (in the order given) seperated by "\n" and use
 
 ##### i2b2 smoking and i2b2 obesity challenge generted QA are different. How ?
 
-For the QA pairs generated from these datasets we do not have an evidence, neither do have a specific entity to look for. Instead the "text" field here is the class information provided in these two challenges. Please refer to the corresponding challenges for more information. 
+For the QA pairs generated from these datasets we do not have an evidence, neither do have a specific entity to look for. Instead the "text" field here is the class information provided in these two challenges and the entire "context" field can be seen as evidence. Please refer to the corresponding challenges for more information about the classes. 
+
+##### The answer evidence is not a complete sentence. Why ?
+
+The annotations used from the i2b2 datasets (except heart disease risk) have both token span and line number annotations. Clinical notes in these datasets are split at the newline character and assigned a line number. Our evidence line is simply the line in the clinical note corresponsing to a particular i2b2 annotation's line number. Since i2b2 heart disease risk annotations has only token span annotations without any  line number annotations, we break the clinical notes at newline character and the line containing the token span is considered as our evidence line. 
+ 
+- When clinical notes are split at newline character, start/stop of the evidence line may not overlap with a complete sentence in a clinical note. To avoid this we tried to use a sentence splitter instead of newline character to determine our evidence lines. But existing sentence splitter's such as NLTK sentence splitter do even worse in breaking a clinical notes sentence because of its noisy, ungrammatical structure.
+- Clinical notes are noisy, so some of the evidence lines may not have complete context or may not be grammatically correct.
 
 ##### i2b2 datasets directory structure
 
@@ -258,13 +265,6 @@ The scipts in this repository are used to parse the following i2b2 directory str
 
 ``` 
 
-
-##### The answer evidence is not a complete sentence. Why ?
-
-The annotations used from the i2b2 datasets (except heart disease risk) have both token span and line number annotations. Clinical notes in these datasets are split at the newline character and assigned a line number. Our evidence line is simply the line in the clinical note corresponsing to a particular i2b2 annotation's line number. Since i2b2 heart disease risk annotations has only token span annotations without any  line number annotations, we break the clinical notes at newline character and the line containing the token span is considered as our evidence line. 
- 
-- When clinical notes are split at newline character, start/stop of the evidence line may not overlap with a complete sentence in a clinical note. To avoid this we tried to use a sentence splitter instead of newline character to determine our evidence lines. But existing sentence splitter's such as NLTK sentence splitter do even worse in breaking a clinical notes sentence because of its noisy, ungrammatical structure.
-- Clinical notes are noisy, so some of the evidence lines may not have complete context or may not be grammatically correct.
 
 ## Dataset Bugs
 
