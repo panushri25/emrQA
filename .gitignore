@@ -1,4 +1,3 @@
-generation/combine_data/squad_format.py
 
 # Compiler outputs #
 *.a
@@ -7,6 +6,7 @@ generation/combine_data/squad_format.py
 *.json
 *.pyc
 temp_risk.txt
+squad_format.py
 
 # Directories #
 output
