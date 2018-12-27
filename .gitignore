@@ -1,3 +1,5 @@
+generation/combine_data/squad_format.py
+
 # Compiler outputs #
 *.a
 *.bat
