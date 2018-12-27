@@ -113,6 +113,8 @@ data.json
        │               │       │
        │               │       ├──"evidence": "evidence line to support the answer entity "
        │               │       │
+       │               │       ├──"answer_entity_type": takes the value "single" or "empty" or "complex" (refer to discussion for more details)
+       │               │       │
        │               │       └── "evidence_start": integer (line number in clinical note to find the evidence line) 
        │               │ 
        │               ├── "id" 
@@ -131,11 +133,15 @@ data.json
 
 ```
 
+<!---
 To generate the data in the SQUAD format (input format for the [DrQA][drqa] baseline in the paper) run,
 
 ```bash
 python generation/combine_data/squad_format.py --output_dir output/
+
 ```
+-->
+
 #### Output: Question-Logical Form (CSV) Format
 
 Each row in the csv file has the following format,
@@ -170,6 +176,35 @@ To run the scripts that filter logical form templates with specific properties,
 python evaluation/template-analysis.py --templates_dir templates/
 ```
 ## Discussion
+
+##### What is the "answer_entity_type" field for ?
+
+The "answer_entity_type" field in `data.json` takes the following values,
+
+1) "empty": This indicates that the "text" field is an empty string, which means that there is no specific entity to look for in the evidence line.
+
+2) "single": This indicates that the "text" field contains a single entity that can be found in the evidence line and can answer the question byitself.
+
+3) "complex": This indicates that each "text" field is a list of entities. This means that each answer needs all the entities in this list to give a single answer. Here the evidence lines and answer_start (line start and token start) are all lists corresponding to the entity. 
+
+#####  Why do I see “coronary artery” instead of  “coronary artery disease” in the question? Why is the entity used in question not complete ?
+
+We have a preprocessing step, before using the i2b2 annotation in the question. This is because the annotation itself are noisy and can include generic concepts within the annotations.
+
+For example,
+
+Minor disease, her disease, her dominant CAD - these are all annotated as problems. So we remove/clean them  using a pre-processing step using some rules which checks for generic words in the annotation. As a result of this we are getting "coronary artery" instead of "coronary artery disease".
+
+##### How is the "context" field related to the clinical notes text ?
+
+In i2b2 medications, i2b2 relations, i2b2 smoking and i2b2 obesity challenge every patient has a single clinical note which is directly used in the "context" field. 
+
+For i2b2 heart disease risk dataset we have 4/5 longitudnal clinical notes per patient named as follows, "note_id-01.txt", "note_id-02.txt"..."note_id-05.txt". Each of these files correspond to notes on a particular day and are already in timeline order. 
+We combine all these ".txt" files (in the order given) seperated by "\n" and use them in the "context" field. The note_id part of the file name is used in "note_id" field. If you wish to break them down into individual notes, you can refer to the "note_id" field and in reverse find the note_id-01.txt, note_id-02.txt contents in the "context" field. 
+
+##### i2b2 smoking and i2b2 obesity challenge generted QA are different. How ?
+
+For the QA pairs generated from these datasets we do not have an evidence, neither do have a specific entity to look for. Instead the "text" field here is the class information provided in these two challenges. Please refer to the corresponding challenges for more information. 
 
 ##### i2b2 datasets directory structure
 
