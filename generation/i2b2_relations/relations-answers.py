@@ -554,10 +554,18 @@ class GenerateRelationsQuestions():
                                 start_line = answer_start_line[idx]
                                 start_token = answer_start_token[idx]
 
+                                if answertype == ["problems,status"]:
+                                    #entity_type = "complex"
+                                    entity_type = "empty"
+                                elif answer[idx] == "":
+                                    entity_type = "empty"
+                                else:
+                                    entity_type = "single"
+
 
                                 #if answer[idx] == "" and start_token != "":
                                 #    print(paraphrase_questions)
-                                val = {"answer_start": [start_line, start_token], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": start_line}
+                                val = {"answer_start": [start_line, start_token], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": start_line, "answer_entity_type": entity_type}
                                 if val not in ans_list:
                                     ans_list.append(val)
 
@@ -705,7 +713,7 @@ class GenerateRelationsQuestions():
                             for idx in range(len(answer)):
                                 #print(answer[idx], result_num[idx], result_token[idx])
                                 #val = {"answer_start": [result_num[idx], result_token[idx]], "text": answer[idx], "evidence": answer_line[idx], "evidence_start": result_num[idx]}
-                                val = {"answer_start": [result_num[idx], ""], "text": "", "evidence": answer_line[idx], "evidence_start": result_num[idx]}
+                                val = {"answer_start": [result_num[idx], ""], "text": "", "evidence": answer_line[idx], "evidence_start": result_num[idx], "answer_entity_type": "empty"}
                                 if val not in ans_list:
                                     ans_list.append(val)
 
@@ -952,7 +960,9 @@ class GenerateRelationsQuestions():
                     print(Noteid)
                 for temp in events:
                     (event, status) = temp
-                    answer += [event[0] + " (" + status + ")"]
+                    #answer += [event[0] + " (" + status + ")"]
+                    #answer.append([event[0], status])
+                    answer.append("")
                     # answer += [event[0]]
                     answer_line.append(event[2])
                     result_start_line.append(int(event[3]))
@@ -961,8 +971,10 @@ class GenerateRelationsQuestions():
                 caused_problems = self.problems_to_badtreatment[Noteid][concept_cluster_1]
 
                 for event in caused_problems:
-                    answer += [event[0] + " (" + "caused" + ")"]
+                    #answer += [event[0] + " (" + "caused" + ")"]
+                    #answer.append([event[0] , "caused"])
                     # answer += [event[0]]
+                    answer.append("")
                     answer_line.append(event[2])
                     result_start_line.append(int(event[3]))
                     result_start_token.append(int(event[4]))
