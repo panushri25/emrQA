@@ -59,10 +59,11 @@ def MakeJSONOutput(smoking_data, json_out, status, filewriter_forlform):
             if question == "":
                 continue
 
+            question_list = question.split("##")
+            for q in question_list:
+                filewriter_forlform.writerow([q, form, q, form])
+
             if answer_type == "smoke_class":
-                question_list = question.split("##")
-                for q in question_list:
-                    filewriter_forlform.writerow([q, form, q, form])
 
                 out["qas"].append({"answers": [{"answer_start": "", "text": state[1], "evidence": "", "evidence_start": ""}],
                  "id": [zip(question_list, question_list), form], "question": question_list})
