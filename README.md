@@ -1,10 +1,8 @@
 # emrQA: A Large Corpus for Question Answering on Electronic Medical Records
-                  The page and codes are still under construction. Please check back in December. 
-                  We are excited to announce that this data will now be hosted directly under the 
-                  i2b2 license !! So you can directly download the dataset from the i2b2 website 
-                  instead of generating it from the scripts. We are setting this up for you, kindly
-                  stay tuned. Believe me it takes some iterations to draw consensus on a usable format. 
-                  But we are almost there. :) 
+                  The page and codes are ready for use. We are excited to announce that this data
+		   will now be hosted directly under the i2b2 license !! So you can directly
+                   download the dataset from the i2b2 website instead of generating it from the scripts.
+                   We are setting this up for you, kindly stay tuned. :) 
 
 - This repo contains code for the paper
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
@@ -32,13 +30,12 @@ Some statistics of the current version of the generated data:
 
 | Datasets | QA pairs | QL pairs | #Clinical Notes | 
 | :------: | :------: | :------: | :----: | 
-| i2b2 relations (concepts, relations)| 141,243 | 245,486 | 425 |
-| i2b2 relations (assertions) | 1,268,029 | 816,224  | 425  |
-| i2b2 medications | 255,908 | 198,739 | 261 |
-| i2b2 heart disease risk | 30,731 | 36,746 | 119 |
-| i2b2 smoking | 4,518 | 6 | 502 |
-| i2b2 obesity | 372,205 | 352 | 1,118 |
-| **emrQA (total)** | **2,072,635** | **1,296,091** | **2,425** |
+| i2b2 relations (concepts, relations, assertions)| 1,322,789 | 1,008,205 | 425 |
+| i2b2 medications | 226,128 | 190,169 | 261 |
+| i2b2 heart disease risk | 49,897 | 35,777 | 119 |
+| i2b2 smoking | 4,518 | 14 | 502 |
+| i2b2 obesity | 354,503 | 336 | 1,118 |
+| **emrQA (total)** | **1,957,835** | **1,225,369** | **2,425** |
 
 **UPDATES:**
 ```
