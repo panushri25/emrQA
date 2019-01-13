@@ -1533,10 +1533,10 @@ class RiskFileAnalysis():
 
                     for idx in range(len(answers)):
                         (text, inline_text, start_inline_text, start) = answers[idx]
-
-                        val = {"answer_start": [start_inline_text, start], "text": text, "evidence": inline_text, "evidence_start": start_inline_text}
-                        #print("idx \n")\
                         entity_type = "single"
+                        val = {"answer_start": [start_inline_text, start], "text": text, "evidence": inline_text, "evidence_start": start_inline_text, "answer_entity_type": entity_type}
+                        #print("idx \n")\
+
 
                         if val not in ans_list:
                             #if val["evidence"] != PatientNote[int(val["evidence_start"]):int(val["evidence_start"]) + len(val["evidence"])]:
@@ -1544,7 +1544,7 @@ class RiskFileAnalysis():
                             #    print("line in note",PatientNote[int(val["evidence_start"]):int(val["evidence_start"]) + len(val["evidence"])])
                             ans_list.append(val)  # evidence will have q_line_answer_line
 
-                    answer_temp = {"answers": ans_list, "id": [values[0], logical_form_orginal],"question": list(list(zip(*values[0])[0])), "answer_entity_type": entity_type}
+                    answer_temp = {"answers": ans_list, "id": [values[0], logical_form_orginal],"question": list(list(zip(*values[0])[0]))}
                     answer_out.append(answer_temp)
 
         return answer_out
