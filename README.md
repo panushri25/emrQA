@@ -9,7 +9,7 @@ Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,
 [emrQA: A Large Corpus for Question Answering on Electronic Medical Records][paper-link],  
 In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, Brussels, Belgium.
 - General queries/thoughts have been addressed in the discussion section below.
-- Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu)  for suggestions and comments. More instructions about reporting bugs detailed below.
+- Please contact [Anusri Pampari][anusri-home] (\<first-name\>@stanford.edu)  for suggestions and comments. More instructions about reporting bugs detailed below.
 
 ## Quick Links
 
@@ -267,7 +267,7 @@ The scipts in this repository are used to parse the following i2b2 directory str
 
 ##### I see a bug in the dataset, What should I do ?
 
-Please contact [Anusri Pampari][anusri-home] (\<last-name\>2@illinois.edu) for any bugs. The more details you provide me about the bug, the easier and hence quicker you will make it for me to debug it. You can help me with the following information:
+Please contact [Anusri Pampari][anusri-home] (\<first-name\>@stanford.edu) for any bugs. The more details you provide me about the bug, the easier and hence quicker you will make it for me to debug it. You can help me with the following information:
 
 ```
 i2b2 dataset name
