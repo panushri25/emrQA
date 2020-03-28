@@ -2,8 +2,7 @@
                   The page and codes are ready for use. We are excited to announce that this data
 		   will now be hosted directly under the i2b2 license !! So you can directly
                    download the dataset from the i2b2 website instead of generating it from the scripts.
-                   We are setting this up for you, kindly stay tuned. :) 
-
+                   For later versions of emrqa and recent updates contact Preethi Raghavan (praghav@us.ibm.com)
 - This repo contains code for the paper
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
 [emrQA: A Large Corpus for Question Answering on Electronic Medical Records][paper-link],  
@@ -266,6 +265,8 @@ The scipts in this repository are used to parse the following i2b2 directory str
 ## Dataset Bugs
 
 ##### I see a bug in the dataset, What should I do ?
+
+For later versions of emrQA and recent updates contact Preethi Raghavan (praghav@us.ibm.com).
 
 Please contact [Anusri Pampari][anusri-home] (\<first-name\>@stanford.edu) for any bugs. The more details you provide me about the bug, the easier and hence quicker you will make it for me to debug it. You can help me with the following information:
 
