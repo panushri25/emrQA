@@ -8,7 +8,7 @@ Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,
 [emrQA: A Large Corpus for Question Answering on Electronic Medical Records][paper-link],  
 In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, Brussels, Belgium.
 - General queries/thoughts have been addressed in the discussion section below.
-- For later versions of emrqa, to automatically download emrQA from i2b2 and recent updates contact Preethi Raghavan (praghav@us.ibm.com). 
+- For later versions of emrQA and to automatically download emrQA from i2b2 contact Preethi Raghavan (praghav@us.ibm.com). 
 - Please contact [Anusri Pampari][anusri-home] (\<first-name\>@stanford.edu)  for suggestions and comments. More instructions about reporting bugs detailed below.
 
 ## Quick Links
