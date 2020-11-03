@@ -19,6 +19,7 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 - [Data Analysis](#emrqa-analysis)
 - [Baselines](#baselines)
 - [Discussion](#discussion)
+- [Current works using emrQA](#current-works-using-emrqa)
 - [Report a bug](#dataset-bugs)
 ##  Question Answering on Electronic Medical Records (EMR)
 
@@ -261,6 +262,16 @@ The scipts in this repository are used to parse the following i2b2 directory str
        
 
 ``` 
+## Current works using emrQA
+
+For a full and updated list please refer to the entire list published [here][citation-list].
+
+- [Improved Pretraining for Domain-specific Contextual Embedding Models][pretraining]
+- [Calibrating Structured Output Predictors for Natural Language Processing][calibration]
+- [Annotating and Characterizing Clinical Sentences with Explicit Why-QA Cues] [why-qa]
+-[Clinical Reading Comprehension: A Thorough Analysis of the emrQA Dataset][crc] - We have some concerns regarding this work and we would like to convey this to the authors through a letter posted [here][letter]
+-[Entity-Enriched Neural Models for Clinical Question Answering][entity]
+
 
 
 ## Dataset Bugs
@@ -280,6 +291,13 @@ An example instance of the bug indetail.
 
 Opening a public issue, might go against the i2b2 license agreement. So it is important you mail me the bug. Thank you for understanding. I will try my best to reply at the earliest.
 
+[entity]: https://arxiv.org/abs/2005.06587
+[why-qa]: https://www.aclweb.org/anthology/W19-1913.pdf
+[letter]: https://docs.google.com/document/d/1IeOqKPy3qzUEvpuSMy0Tvg7rjfYoAkn1ueplC5RXjpA/edit?usp=sharing
+[crc]: https://arxiv.org/abs/2005.00574
+[pretraining]: https://arxiv.org/pdf/2004.02288.pdf
+[calibration]: https://arxiv.org/pdf/2004.04361.pdf
+[citation-list]: https://scholar.google.com/scholar?cites=14819103415098730167&as_sdt=2005&sciodt=0,5&hl=en
 [i2b2-datasets]: https://www.i2b2.org/NLP/DataSets/
 [anusri-home]: https://www.linkedin.com/in/anusri-pampari-594bb5126/
 [drqa]: https://github.com/facebookresearch/DrQA
