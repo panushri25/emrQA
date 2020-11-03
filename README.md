@@ -19,8 +19,9 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 - [Data Analysis](#emrqa-analysis)
 - [Baselines](#baselines)
 - [Discussion](#discussion)
-- [Current works using emrQA](#current-works-using-emrqa)
 - [Report a bug](#dataset-bugs)
+- [Current works using emrQA](#current-works-using-emrqa)
+
 ##  Question Answering on Electronic Medical Records (EMR)
 
 In this work, we address the lack of any publicly available EMR Question Answering (QA) corpus by creating a large-scale dataset, emrQA, using a novel semi-automated generation framework that allows for minimal expert involvement and re-purposes existing annotations available for other clinical NLP tasks. To briefly summarize the  generation process: (1) we collect questions from experts (2) convert them to templates by replacing entities with placeholders (3) expert annotate the templates with logical form templates and then (4) use annotations from existing NLP tasks (based on information in logical forms) to populate placeholders in templates and generate answers. For our purpose, we use existing  NLP task annotations  from the [i2b2 Challenge datasets][i2b2-datasets]. We refer the reader to the paper to get a more detailed overview of the generation framework.
@@ -269,8 +270,8 @@ For a full and updated list please refer to the entire list published [here][cit
 - [Improved Pretraining for Domain-specific Contextual Embedding Models][pretraining]
 - [Calibrating Structured Output Predictors for Natural Language Processing][calibration]
 - [Annotating and Characterizing Clinical Sentences with Explicit Why-QA Cues] [why-qa]
--[Clinical Reading Comprehension: A Thorough Analysis of the emrQA Dataset][crc] - We have some concerns regarding this work and we would like to convey this to the authors through a letter posted [here][letter]
--[Entity-Enriched Neural Models for Clinical Question Answering][entity]
+- [Entity-Enriched Neural Models for Clinical Question Answering][entity]
+- [Clinical Reading Comprehension: A Thorough Analysis of the emrQA Dataset][crc] - We have some concerns regarding this work and we would like to convey this to the authors through a letter posted [here]
 
 
 
