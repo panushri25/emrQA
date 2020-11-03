@@ -263,15 +263,6 @@ The scipts in this repository are used to parse the following i2b2 directory str
        
 
 ``` 
-## Current works using emrQA
-
-For a full and updated list please refer to the entire list published [here][citation-list].
-
-- [Improved Pretraining for Domain-specific Contextual Embedding Models][pretraining]
-- [Calibrating Structured Output Predictors for Natural Language Processing][calibration]
-- [Annotating and Characterizing Clinical Sentences with Explicit Why-QA Cues] [why-qa]
-- [Entity-Enriched Neural Models for Clinical Question Answering][entity]
-- [Clinical Reading Comprehension: A Thorough Analysis of the emrQA Dataset][crc] - We have some concerns regarding this work and we would like to convey this to the authors through a letter posted [here]
 
 
 
@@ -291,6 +282,17 @@ An example instance of the bug indetail.
 ```
 
 Opening a public issue, might go against the i2b2 license agreement. So it is important you mail me the bug. Thank you for understanding. I will try my best to reply at the earliest.
+
+## Current works using emrQA
+
+For a full and updated list please refer to the entire list published [here][citation-list].
+
+- [Improved Pretraining for Domain-specific Contextual Embedding Models][pretraining]
+- [Calibrating Structured Output Predictors for Natural Language Processing][calibration]
+- [Annotating and Characterizing Clinical Sentences with Explicit Why-QA Cues][why-qa]
+- [Entity-Enriched Neural Models for Clinical Question Answering][entity]
+- [Clinical Reading Comprehension: A Thorough Analysis of the emrQA Dataset][crc] - We have some concerns regarding this work (bias in the emrQA dataset used) and we would like to convey this to the authors through a letter posted [here]
+
 
 [entity]: https://arxiv.org/abs/2005.06587
 [why-qa]: https://www.aclweb.org/anthology/W19-1913.pdf
