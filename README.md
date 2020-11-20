@@ -293,8 +293,12 @@ For a full and updated list please refer to the entire list published [here][cit
 - [Entity-Enriched Neural Models for Clinical Question Answering][entity]
 - [Evaluation of Dataset Selection for Pre-Training and Fine-Tuning Transformer Language Models for Clinical Question Answering][eval]
 - [CliniQG4QA: Generating Diverse Questions for Domain Adaptation of Clinical Question Answering][da]
+-[How You Ask Matters: The Effect of Paraphrastic Questions to BERT Performance on a Clinical SQuAD Dataset][para1]
+-[Advancing Seq2seq with Joint Paraphrase Learning][para2]
 - [Clinical Reading Comprehension: A Thorough Analysis of the emrQA Dataset][crc] - Though this work provides interesting analysis on some sub-parts of emrQA, we have concerns regarding the dataset bias considered in their analysis resulting in the said conclusions. We think that the emrQA readers should be aware of this bias and hence we try to convey this through a letter posted [here][letter] for the readers.
 
+[para1]:https://www.aclweb.org/anthology/2020.clinicalnlp-1.13.pdf
+[para2]:https://www.aclweb.org/anthology/2020.clinicalnlp-1.30.pdf
 [da]: https://arxiv.org/pdf/2010.16021.pdf
 [eval]: https://www.aclweb.org/anthology/2020.lrec-1.679.pdf
 [entity]: https://arxiv.org/abs/2005.06587
