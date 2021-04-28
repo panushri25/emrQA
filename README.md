@@ -1,8 +1,10 @@
 # emrQA: A Large Corpus for Question Answering on Electronic Medical Records
                   The page and codes are ready for use. We are excited to announce that this data
 		   will now be hosted directly under the i2b2 license !! So you can directly
-                   download the dataset from the i2b2 website instead of generating it from the scripts.
-                   For later versions of emrqa and recent updates contact Preethi Raghavan (praghav@us.ibm.com)
+                   download the dataset from the i2b2 website instead of generating it from the scripts!
+		   For downloaing instructions please refer to the instructions under the download tab below.                    
+		   For later versions of emrqa and recent updates contact Preethi Raghavan (praghav@us.ibm.com).
+
 - This repo contains code for the paper
 Anusri Pampari, Preethi Raghavan, Jennifer Liang and Jian Peng,  
 [emrQA: A Large Corpus for Question Answering on Electronic Medical Records][paper-link],  
@@ -14,6 +16,7 @@ In Conference on Empirical Methods in Natural Language Processing (EMNLP) 2018, 
 ## Quick Links
 
 - [About](#question-answering-on-electronic-medical-records)
+- [Download Dataset](#download-dataset)
 - [Requirements](#requirements)
 - [Data Generation](#emrqa-generation)
 - [Data Analysis](#emrqa-analysis)
@@ -41,11 +44,16 @@ Some statistics of the current version of the generated data:
 
 **UPDATES:**
 ```
-29th Novemebr 2018: We are excited to announce that this data will now be hosted directly under the i2b2 license !! So you can directly download the dataset from the i2b2 website instead of generating it from the scripts. We are setting this up, kindly stay tuned. Expected date of setup: Mid december !
+29th Novemebr 2018: We are excited to announce that this data will now be hosted directly under the i2b2 license !! So you can directly download the dataset from the i2b2 website instead of generating it from the scripts.
 27th August 2018: Extended the i2b2 obesity question-answer pairs to obesity comorbidities. 
 20th August 2018: Added QA pairs generated from i2b2 relations (assertions). 
 27th Jun 2018: Dataset as decribed in the paper. 
 ```
+
+## Download Dataset
+
+emrQA is available for download here: https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/ (you'll need to sign the agreement and request for the data, it come through the same day). You'll find it listed under Community Annotations Downloads as follows - 
+
 
 ## Requirements
 
