@@ -287,6 +287,7 @@ Opening a public issue, might go against the i2b2 license agreement. So it is im
 
 For a full and updated list please refer to the entire list published [here][citation-list].
 
+- [Neural Mask Generator: Learning to Generate Adaptive Word Maskings for Language Model Adaptation][NMG]
 - [Improved Pretraining for Domain-specific Contextual Embedding Models][pretraining]
 - [Calibrating Structured Output Predictors for Natural Language Processing][calibration]
 - [Annotating and Characterizing Clinical Sentences with Explicit Why-QA Cues][why-qa]
@@ -297,6 +298,7 @@ For a full and updated list please refer to the entire list published [here][cit
 - [Advancing Seq2seq with Joint Paraphrase Learning][para2]
 - [Clinical Reading Comprehension: A Thorough Analysis of the emrQA Dataset][crc] - Though this work provides interesting analysis on some sub-parts of emrQA, we have concerns regarding the dataset bias considered in their analysis resulting in the said conclusions. We think that the emrQA readers should be aware of this bias and hence we try to convey this through a letter posted [here][letter] for the readers.
 
+[NMG]:https://arxiv.org/abs/2010.02705
 [para1]:https://www.aclweb.org/anthology/2020.clinicalnlp-1.13.pdf
 [para2]:https://www.aclweb.org/anthology/2020.clinicalnlp-1.30.pdf
 [da]: https://arxiv.org/pdf/2010.16021.pdf
