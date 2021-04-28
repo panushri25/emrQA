@@ -57,6 +57,8 @@ emrQA is available for download here: https://portal.dbmi.hms.harvard.edu/projec
 
 ![Image](emrqa_download_image.jpg)
 
+Please note that the download link title in the image has a typo. The link says that question answers were generated from 2014 Heart Disease risk factors data but it is generated from all the datasets listed in the table above (medications, smoking, obesity, heart disease and relations). So ignore the title and go ahead and downlaod the entire dataset from the link. i2b2/n2c2 will soon fix this typo.
+
 ## Requirements
 
 To generate emrQA, first download the NLP Datasets from the [i2b2 Challenges][i2b2-datasets] accessible by everyone subject to a license agreement. You will need to download and extract all the datasets corresponding to given a challenge (e.g 2009 Medications Challenge) to a directory named `i2b2` in the main folder  (the contains of the folder location are eloborated below in the discussion section for your reference). Once completed, check the path location in `main.py`.  In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
