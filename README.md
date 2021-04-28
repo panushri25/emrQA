@@ -2,7 +2,7 @@
                   The page and codes are ready for use. We are excited to announce that this data
 		   will now be hosted directly under the i2b2 license !! So you can directly
                    download the dataset from the i2b2 website instead of generating it from the scripts!
-		   For downloaing instructions please refer to the instructions under the download tab below.                    
+		   For downloading please refer to the instructions under the download tab below.                    
 		   For later versions of emrqa and recent updates contact Preethi Raghavan (praghav@us.ibm.com).
 
 - This repo contains code for the paper
