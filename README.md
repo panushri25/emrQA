@@ -52,8 +52,9 @@ Some statistics of the current version of the generated data:
 
 ## Download Dataset
 
-emrQA is available for download here: https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/ (you'll need to sign the agreement and request for the data, it come through the same day). You'll find it listed under Community Annotations Downloads as follows - 
+emrQA is available for download here: https://portal.dbmi.hms.harvard.edu/projects/n2c2-nlp/ (you'll need to sign the agreement and request for the data, it comes through the same day). You'll find it listed under Community Annotations Downloads as follows - 
 
+![Image](emrqa_download_image.jpg)
 
 ## Requirements
 
