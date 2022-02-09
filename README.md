@@ -63,13 +63,24 @@ Please note that the download link title in the image has a typo. The link says 
 
 To generate emrQA, first download the NLP Datasets from the [i2b2 Challenges][i2b2-datasets] accessible by everyone subject to a license agreement. You will need to download and extract all the datasets corresponding to given a challenge (e.g 2009 Medications Challenge) to a directory named `i2b2` in the main folder  (the contains of the folder location are eloborated below in the discussion section for your reference). Once completed, check the path location in `main.py`.  In our work, we have currently made use of all the challenge datasets except the 2012 Temporal Relations Challenge. Our future extensions of the dataset to include this challenge dataset  will soon be available. 
 
-The generation scrpits in the repo require Python 2.7. Run the following commands to clone the repository and install the requirements for emrQA:
+The generation scripts in the repo require Python 2.7. Run the following commands to clone the repository and install the requirements for emrQA:
 
 ```bash
 git clone https://github.com/emrqa/emrQA.git
 cd emrQA; pip install -r requirements.txt
 ```
 
+If you're having issues installing the requirements in a Python 2.7 environment, it might be because the `regex` package is a dependency of `nltk` and recent versions of the `regex` package require Python 3.  As a workaround, you can try the following:
+
+```bash
+python2.7 -m pip install --upgrade pip
+python2.7 -m pip install grpcio
+python2.7 -m pip install "regex<2022.1.18"
+python2.7 -m pip install nltk==3.4
+python2.7 -m pip install xmltodict
+```
+
+NLTK 3.0 might throw errors when running `nltk.download()` and NLTK 3.5 has an [error upon import](https://stackoverflow.com/questions/61560956/invalid-syntax-on-importing-nltk-in-python-2-7).
 
 ## emrQA Generation
 

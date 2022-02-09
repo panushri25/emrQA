@@ -77,7 +77,11 @@ class GenerateQA():
                 note_id = note_id.split("_")[0]
                 # print(file)
                 dictionary = {note_id: []}
-                PatientNote = ClinicalNotes[note_id]  ## access the corresponding clinical note.
+                if note_id not in ClinicalNotes: # Make sure we have the note
+                    print('Unable to find note_id {note_id}'.format(note_id=note_id))
+                    continue
+                else:
+                    PatientNote = ClinicalNotes[note_id] ## access the corresponding clinical note.
                 flag = 0
                 for line in remote_file:
                     med_list = {}
