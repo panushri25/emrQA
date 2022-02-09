@@ -76,7 +76,7 @@ If you're having issues installing the requirements in a Python 2.7 environment,
 python2.7 -m pip install --upgrade pip
 python2.7 -m pip install grpcio
 python2.7 -m pip install "regex<2022.1.18"
-python2.7 -m pip install nltk==3.0
+python2.7 -m pip install nltk==3.4
 python2.7 -m pip install xmltodict
 ```
 
